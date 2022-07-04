@@ -20,11 +20,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.util.Collector;
 
-import javax.swing.plaf.IconUIResource;
+
 
 /**
  * @author shogunate
- * @description TODO
+ * @description DimApp: Sourcing FlinkCDC filter dim table from ods_db.
  * @date 2022/7/4 15:07
  */
 public class DimApp extends BaseAppV1{
