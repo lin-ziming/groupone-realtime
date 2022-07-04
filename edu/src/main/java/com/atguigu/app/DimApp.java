@@ -36,11 +36,11 @@ public class DimApp extends BaseAppV1{
     @Override
     public void handle(StreamExecutionEnvironment env, DataStreamSource<String> stream) {
         SingleOutputStreamOperator<String> etlStream = etl(stream);
-//        etlStream.print();
-        SingleOutputStreamOperator<TableProcess> tpStream = tpSourceFromFlinkCDC(env);
+        etlStream.print();
+//        SingleOutputStreamOperator<TableProcess> tpStream = tpSourceFromFlinkCDC(env);
 //        tpStream.print();
 
-        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connectedStream = connect(etlStream, tpStream);
+//        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connectedStream = connect(etlStream, tpStream);
 //        connectedStream.print();
 
         //create table to pho
