@@ -41,7 +41,13 @@ public class DimApp extends BaseAppV1{
 //        tpStream.print();
 
         SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connectedStream = connect(etlStream, tpStream);
-        connectedStream.print();
+//        connectedStream.print();
+
+        //create table to pho
+
+        //filter sink cols
+
+        //write to pho
     }
 
     private SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connect(SingleOutputStreamOperator<String> dataStream, SingleOutputStreamOperator<TableProcess> tpStream) {
