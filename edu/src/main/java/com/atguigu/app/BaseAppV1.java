@@ -19,10 +19,6 @@ public abstract class BaseAppV1 {
      */
     public void init(int port, int p, String ckGroupIdJobName, String topic){
         System.setProperty("HADOOP_USER_NAME","atguigu");
-
-        org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
-        configuration.set("dfs.client.use.datanode.hostname", "true");
-
         Configuration conf = new Configuration();
         conf.setInteger("rest.port",port);
 
