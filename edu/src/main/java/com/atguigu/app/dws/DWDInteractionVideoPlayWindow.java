@@ -1,4 +1,4 @@
-package com.atguigu.app.dwd;
+package com.atguigu.app.dws;
 
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV1;
