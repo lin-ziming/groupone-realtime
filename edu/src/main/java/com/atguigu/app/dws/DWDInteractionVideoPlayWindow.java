@@ -53,7 +53,22 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
 
     private void joinDimVideoInfo(SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream) {
         AsyncDataStream.unorderedWait(beanStream,
-            new DimAsyncFunction(),
+            new DimAsyncFunction<DWDInteractionVideoPlayBean>() {
+                @Override
+                public String getTable() {
+                    return null;
+                }
+
+                @Override
+                public String getId(DWDInteractionVideoPlayBean input) {
+                    return null;
+                }
+
+                @Override
+                public void addDim(DWDInteractionVideoPlayBean input, JSONObject dim) {
+
+                }
+            },
             60,
             TimeUnit.SECONDS);
     }
