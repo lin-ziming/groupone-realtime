@@ -1,0 +1,45 @@
+package com.atguigu.util;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
+/**
+ * @author shogunate
+ * @description TODO
+ * @date 2022/7/5 16:58
+ */
+public class JedisPoolUtil {
+
+    private JedisPoolUtil(){}
+
+    private static class JedisPoolUtilHolder{
+        private static final JedisPoolUtil instance = new JedisPoolUtil();
+    }
+
+    public static JedisPoolUtil getJedisPoolInstance() {
+        return JedisPoolUtilHolder.instance;
+    }
+
+    public Jedis getJedisPoolClient(){
+        JedisPoolConfig conf = getJedisPoolConfig();
+        JedisPool jedisPool = new JedisPool(conf, "hadoop302");
+        Jedis client = jedisPool.getResource();
+        client.select(1);
+        return client;
+    }
+
+    private JedisPoolConfig getJedisPoolConfig() {
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+
+        jedisPoolConfig.setMaxIdle(10);
+        jedisPoolConfig.setMinIdle(2);
+        jedisPoolConfig.setMaxTotal(100);
+        jedisPoolConfig.setMaxWaitMillis(10*1000);
+        jedisPoolConfig.setTestOnBorrow(true);
+        jedisPoolConfig.setTestOnReturn(true);
+        jedisPoolConfig.setTestOnCreate(true);
+
+        return jedisPoolConfig;
+    }
+}
