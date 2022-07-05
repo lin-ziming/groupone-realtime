@@ -86,6 +86,7 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         " `data`['origin_amount'] split_origin_amount, " +
                         " `data`['coupon_reduce'] split_coupon_reduce, " +
                         " `data`['final_amount'] split_final_amount, " +
+                        " `data`['order_status'] order_status, " +
                         " ts * 1000 ts," +
                         " pt " +
                         "from ods_db " +
@@ -111,7 +112,8 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         " js.source_name source_name," +
                         " od.split_origin_amount split_origin_amount, " +
                         " od.split_coupon_reduce split_coupon_reduce, " +
-                        " od.split_final_amount split_final_amount," +
+                        " od.split_final_amount split_final_amount, " +
+                        " od.order_status order_status, " +
                         " ts, " +
                         " current_row_timestamp() row_op_ts " +
                         "from order_detail od " +
@@ -137,6 +139,7 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
                         "split_origin_amount string, " +
                         "split_coupon_reduce string, " +
                         "split_final_amount string, " +
+                        "order_status string, " +
                         "ts bigint, " +
                         "row_op_ts timestamp_ltz(3) " +
                         ")" +
