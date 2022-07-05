@@ -17,7 +17,7 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
     private static final String APPNAME = "DwdTradePaySucDetail";
 
     public static void main(String[] args) {
-        new DwdTradeCartAdd().init(
+        new DwdTradePaySucDetail().init(
                 1112,
                 2,
                 APPNAME,
@@ -39,7 +39,7 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
                         " `data`['order_id'] order_id, " +
                         " cast(`data`['origin_amount'] as bigint) origin_amount, " +
                         " cast(`data`['coupon_reduce'] as bigint) coupon_reduce, " +
-                        " cast(`data`['final_amount'] as bigint) final_amount, " +
+                        " cast(`data`['final_amount'] as bigint) final_amount " +
                         "from ods_db " +
                         "where `database`='gmall' " +
                         "and `table`='order_detail' " +
@@ -74,7 +74,7 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
                         " pi.payment_type payment_type, " +
                         " pi.callback_time callback_time, " +
                         " pi.ts " +
-                        "from payment_info pi" +
+                        "from payment_info pi " +
                         "join order_detail od on pi.order_id=od.order_id "
         );
 
@@ -89,9 +89,9 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
                         " split_origin_amount bigint, " +
                         " split_coupon_reduce bigint, " +
                         " split_final_amount bigint, " +
-                        " payment_type, " +
-                        " callback_time, " +
-                        " ts " +
+                        " payment_type string, " +
+                        " callback_time string, " +
+                        " ts bigint" +
                         ")" +
                         SQLUtil.getKafkaSinkDDL(Constant.TOPIC_DWD_PAY_SUC_DETAIL)
         );
