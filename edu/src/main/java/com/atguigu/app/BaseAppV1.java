@@ -40,7 +40,7 @@ public abstract class BaseAppV1 {
 //        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(
 //                ckGroupIdJobName,
 //                topic,
-//                new Long[]{1500L})); //可在此处指定每个分区的偏移量起始位置，从0分区开始指定
+//                new Long[]{6000L, 6000L})); //可在此处指定每个分区的偏移量起始位置，从0分区开始指定
 
         handle(env,stream);
 
