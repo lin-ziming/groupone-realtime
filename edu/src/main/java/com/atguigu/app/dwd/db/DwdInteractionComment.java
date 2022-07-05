@@ -13,7 +13,7 @@ public class DwdInteractionComment extends BaseSQLApp {
         new DwdInteractionComment().init(
             2015,
             2,
-            "DwdInteractionReview",
+            "DwdInteractionComment",
             10
         );
     }
@@ -21,10 +21,10 @@ public class DwdInteractionComment extends BaseSQLApp {
     @Override
     protected void handle(StreamExecutionEnvironment env, StreamTableEnvironment tEnv) {
         //读取ods_db数据
-        readOdsDb(tEnv, "DwdInteractionReview");
+        readOdsDb(tEnv, "DwdInteractionComment");
 
-        //过滤出评价表
-        Table reviewInfo = tEnv.sqlQuery("select " +
+        //过滤出章节评价表
+        Table commentInfo = tEnv.sqlQuery("select " +
                                             "data['id'] id,  " +
                                             "data['user_id'] user_id,  " +
                                             "data['chapter_id'] chapter_id,  " +
@@ -51,7 +51,7 @@ public class DwdInteractionComment extends BaseSQLApp {
                             "ts string  " +
                             ")" + SQLUtil.getKafkaSinkDDL(Constant.TOPIC_DWD_INTERACTION_COMMENT));
         
-        reviewInfo.executeInsert("dwd_interaction_review");
+        commentInfo.executeInsert("dwd_interaction_comment");
 
     }
 }
