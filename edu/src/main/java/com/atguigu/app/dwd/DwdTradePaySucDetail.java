@@ -19,7 +19,7 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
 
     public static void main(String[] args) {
         new DwdTradePaySucDetail().init(
-                1112,
+                11112,
                 2,
                 APPNAME,
                 30 * 60
@@ -52,7 +52,7 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
 //        tEnv.sqlQuery("select sessionId,sc from session_sc").execute().print();
 
         // 从base_source获取sc_name
-        BaseSourceUtil.readBaseSource(env, tEnv);
+        BaseSourceUtil.readBaseSource(tEnv);
 //        tEnv.sqlQuery("select id,source_site from base_source").execute().print();
 
         // 三表join,获取session_id,sc_code,sc_name
