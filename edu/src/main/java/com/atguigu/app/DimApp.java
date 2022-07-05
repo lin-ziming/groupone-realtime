@@ -36,12 +36,12 @@ public class DimApp extends BaseAppV1{
     @Override
     public void handle(StreamExecutionEnvironment env, DataStreamSource<String> stream) {
         SingleOutputStreamOperator<String> etlStream = etl(stream);
-        etlStream.print();
-//        SingleOutputStreamOperator<TableProcess> tpStream = tpSourceFromFlinkCDC(env);
+//        etlStream.print();
+        SingleOutputStreamOperator<TableProcess> tpStream = tpSourceFromFlinkCDC(env);
 //        tpStream.print();
 
-//        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connectedStream = connect(etlStream, tpStream);
-//        connectedStream.print();
+        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connectedStream = connect(etlStream, tpStream);
+        connectedStream.print();
 
         //create table to pho
 
@@ -99,7 +99,7 @@ public class DimApp extends BaseAppV1{
                     try {
                         //data != null and empty && type && database
                         return !Strings.isNullOrEmpty(value.getJSONObject("data").toJSONString())
-                            && Constant.DATABASE_NAME.equals(value.getString("database"))
+                            && "gmall".equals(value.getString("database"))
                             && ("insert".equals(type) || "update".equals(type) || "bootstrap-insert".equals(type));
 
                     } catch (Exception e) {
