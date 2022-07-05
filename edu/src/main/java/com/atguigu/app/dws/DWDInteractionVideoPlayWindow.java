@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV1;
 import com.atguigu.bean.DWDInteractionVideoPlayBean;
 import com.atguigu.common.Constant;
+import com.atguigu.function.DimAsyncFunction;
 import com.atguigu.util.DateFormatUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
+import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -19,6 +21,7 @@ import org.apache.flink.util.Collector;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author shogunate
@@ -38,11 +41,21 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
 //        beanStream.print();
 
         //要先dim join chapter_info 获取维度后才聚合, keyby chapter_id
+        joinDimVideoInfo(beanStream);
+
+
 
         SingleOutputStreamOperator<DWDInteractionVideoPlayBean> noDiwStream = WindowAllAndAggregate(beanStream);
-        noDiwStream.print();
+//        noDiwStream.print();
 
 
+    }
+
+    private void joinDimVideoInfo(SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream) {
+        AsyncDataStream.unorderedWait(beanStream,
+            new DimAsyncFunction(),
+            60,
+            TimeUnit.SECONDS);
     }
 
     private SingleOutputStreamOperator<DWDInteractionVideoPlayBean> WindowAllAndAggregate(SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream) {
