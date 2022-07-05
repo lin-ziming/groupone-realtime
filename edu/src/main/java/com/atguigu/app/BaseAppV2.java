@@ -24,6 +24,8 @@ public abstract class BaseAppV2 {
         System.setProperty("HADOOP_USER_NAME", "atguigu");
         Configuration conf = new Configuration();
         conf.setInteger("rest.port", port);
+        conf.setString("flink.hadoop.dfs.client.use.datanode.hostname","true"); //
+
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(p);
 
