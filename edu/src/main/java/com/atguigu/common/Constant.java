@@ -1,11 +1,11 @@
 package com.atguigu.common;
 
 public class Constant {
-    public static final String KAFKA_BROKERS = "hadoop302:9092,hadoop303:9092,hadoop304:9092";
-    public static final String PHOENIX_DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
-    public static final String PHOENIX_URL = "jdbc:phoenix:hadoop302,hadoop303,hadoop304:2181";
-    public static final String TOPIC_ODS_DB = "ods_db";
-    public static final String TOPIC_ODS_LOG = "ods_log";
+	public static final String KAFKA_BROKERS = "hadoop302:9092,hadoop303:9092,hadoop304:9092";
+	public static final String PHOENIX_DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
+	public static final String PHOENIX_URL = "jdbc:phoenix:hadoop302,hadoop303,hadoop304:2181";
+	public static final String TOPIC_ODS_DB = "ods_db";
+	public static final String TOPIC_ODS_LOG = "ods_log";
 
 	public static final String CLICKHOUSE_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
 	public static final String CLICKHOUSE_URL = "jdbc:clickhouse://hadoop302:8123/gmall2022";
@@ -19,4 +19,5 @@ public class Constant {
     public static final String TOPIC_DWD_TRAFFIC_APPVIDEO = "dwd_traffic_appvideo";
     public static final String TOPIC_DWD_TRADE_CART_ADD = "dwd_trade_cart_add";
     public static final String TOPIC_DWD_PAY_SUC_DETAIL = "dwd_trade_pay_suc_detail";
+	public static final String TOPIC_DWD_TRAFFIC_UV = "dwd_traffic_uv";
 }
