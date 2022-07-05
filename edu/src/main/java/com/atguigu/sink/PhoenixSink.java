@@ -24,7 +24,9 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
 
     @Override
     public void close() throws Exception {
-        super.close();
+        if (phoenixJdbcConn != null) {
+            phoenixJdbcConn.close();
+        }
     }
 
     @Override
