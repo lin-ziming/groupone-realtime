@@ -37,7 +37,7 @@ public class DwdTradeCartAdd extends BaseSQLApp {
         Table sessionIdAndSc = BaseSourceUtil.readOdsLog(env, tEnv, APPNAME, startOffsets);
         tEnv.createTemporaryView("session_sc", sessionIdAndSc);
 
-        BaseSourceUtil.readBaseSource(env, tEnv);
+        BaseSourceUtil.readBaseSource(tEnv);
 
         // 从ods_db中过滤cart_info
         Table cartInfo = tEnv.sqlQuery(
