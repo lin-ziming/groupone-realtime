@@ -15,18 +15,23 @@ import java.sql.SQLException;
 /**
  * @author shogunate
  * @description phoenix for Tuple2<JSONObject, TableProcess>, generic later
- *              connect druidPool and redisPool later
+ * connect druidPool and redisPool later
  * @date 2022/7/5 14:05
  */
 public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProcess>> {
 
     private DruidPooledConnection phoenixJdbcConn;
+//    private Jedis jedisPoolClient;
 
     @Override
     public void close() throws Exception {
         if (phoenixJdbcConn != null) {
             phoenixJdbcConn.close();
         }
+        //todo: Wait redis client start
+//        if (jedisPoolClient != null){
+//            jedisPoolClient.close();
+//        }
     }
 
     @Override
@@ -35,12 +40,29 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
         DruidPoolUtil druidPoolInstance = DruidPoolUtil.getDruidPoolInstance();
         DruidDataSource druidDataSource = druidPoolInstance.getDruidDataSource();
         phoenixJdbcConn = druidDataSource.getConnection();
+
+//        JedisPoolUtil jedisPoolInstance = JedisPoolUtil.getJedisPoolInstance();
+//        jedisPoolClient = jedisPoolInstance.getJedisPoolClient();
     }
 
     @Override
     public void invoke(Tuple2<JSONObject, TableProcess> value, Context context) throws Exception {
+
         writeToPhoenix(value);
+
+//        delRedisCache(value);
     }
+
+//     private void delRedisCache(Tuple2<JSONObject, TableProcess> value) {
+//
+//        if ("update".equals(value.f1.getOperate_type())) {
+//            Long id = value.f0.getLong("id");
+//            String table = value.f1.getSourceTable();
+//            String key = table + ":" + id;
+//
+//            jedisPoolClient.del(key);
+//        }
+//    }
 
     private void writeToPhoenix(Tuple2<JSONObject, TableProcess> value) throws SQLException {
 
@@ -50,22 +72,22 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
         sql
             .append(value.f1.getSinkTable()).append("(")
             .append(value.f1.getSinkColumns()).append(") values (")
-            .append(value.f1.getSinkColumns().replaceAll("[^,]+","?"))
+            .append(value.f1.getSinkColumns().replaceAll("[^,]+", "?"))
             .append(")");
-        System.out.println("sinkSql---"+sql);
+        System.out.println("sinkSql---" + sql);
 
         PreparedStatement ps = phoenixJdbcConn.prepareStatement(sql.toString());
 
         String[] sinkCols = value.f1.getSinkColumns().split(",");
         for (int i = 0; i < sinkCols.length; i++) {
 
-            if(value.f0.containsKey(sinkCols[i])){
+            if (value.f0.containsKey(sinkCols[i])) {
 
                 Object o = value.f0.get(sinkCols[i]);
-                ps.setString(i+1, o == null ? null : o.toString());
-            }else {
+                ps.setString(i + 1, o == null ? null : o.toString());
+            } else {
 
-                ps.setString(i+1, null);
+                ps.setString(i + 1, null);
             }
         }
         // how to addBatch
