@@ -21,15 +21,16 @@ public class JedisPoolUtil {
         return JedisPoolUtilHolder.instance;
     }
 
+    private JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302");
+
     public Jedis getJedisPoolClient(){
-        JedisPoolConfig conf = getJedisPoolConfig();
-        JedisPool jedisPool = new JedisPool(conf, "hadoop302");
+
         Jedis client = jedisPool.getResource();
         client.select(1);
         return client;
     }
 
-    private JedisPoolConfig getJedisPoolConfig() {
+    private static JedisPoolConfig getJedisPoolConfig() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
 
         jedisPoolConfig.setMaxIdle(10);

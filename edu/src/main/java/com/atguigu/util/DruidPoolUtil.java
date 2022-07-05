@@ -15,12 +15,13 @@ public class DruidPoolUtil {
         private static final DruidPoolUtil instance = new DruidPoolUtil();
     }
 
+    private DruidDataSource druidDataSource = new DruidDataSource();
+
     public static DruidPoolUtil getDruidPoolInstance(){
         return DruidPoolUtilHolder.instance;
     }
 
     public  DruidDataSource getDruidDataSource(){
-        DruidDataSource druidDataSource = new DruidDataSource();
 
         setDruidConfig(druidDataSource);
 
