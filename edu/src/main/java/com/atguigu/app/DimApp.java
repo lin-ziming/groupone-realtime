@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSONAware;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.bean.TableProcess;
 import com.atguigu.common.Constant;
+import com.atguigu.util.FlinkSinkUtil;
 import com.atguigu.util.FlinkSourceUtil;
+import com.atguigu.util.JdbcUtil;
 import com.google.common.base.Strings;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FilterFunction;
@@ -13,6 +15,7 @@ import org.apache.flink.api.common.state.BroadcastState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -20,6 +23,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -35,19 +44,39 @@ public class DimApp extends BaseAppV1{
 
     @Override
     public void handle(StreamExecutionEnvironment env, DataStreamSource<String> stream) {
+        //etl
         SingleOutputStreamOperator<String> etlStream = etl(stream);
-//        etlStream.print();
+
+        //flinkCDC source table config
         SingleOutputStreamOperator<TableProcess> tpStream = tpSourceFromFlinkCDC(env);
-//        tpStream.print();
 
+        //Create sinkTable into phoenix and connect dataStream
         SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connectedStream = connect(etlStream, tpStream);
-        connectedStream.print();
-
-        //create table to pho
 
         //filter sink cols
+        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> sinkStream = filterSinkCols(connectedStream);
 
         //write to pho
+        sinkStream.addSink(FlinkSinkUtil.getPhoenixSink());
+    }
+
+    private SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> filterSinkCols(SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> stream) {
+        return stream.map(new MapFunction<Tuple2<JSONObject, TableProcess>, Tuple2<JSONObject, TableProcess>>() {
+            @Override
+            public Tuple2<JSONObject, TableProcess> map(Tuple2<JSONObject, TableProcess> value) throws Exception {
+
+                JSONObject data = value.f0;
+                TableProcess tp = value.f1;
+                Set<String> dataCols = data.keySet();
+
+
+                List<String> columns = Arrays.asList(tp.getSinkColumns().split(","));
+
+                dataCols.removeIf(col->!columns.contains(col));
+
+                return value;
+            }
+        });
     }
 
     private SingleOutputStreamOperator<Tuple2<JSONObject, TableProcess>> connect(SingleOutputStreamOperator<String> dataStream, SingleOutputStreamOperator<TableProcess> tpStream) {
@@ -55,6 +84,21 @@ public class DimApp extends BaseAppV1{
         BroadcastStream<TableProcess> bcStream = tpStream.broadcast(bcMapStateDesc);
         return dataStream.connect(bcStream)
             .process(new BroadcastProcessFunction<String, TableProcess, Tuple2<JSONObject, TableProcess>>() {
+
+                private Connection phoenixConn;
+
+                @Override
+                public void open(Configuration parameters) throws Exception {
+                    phoenixConn = JdbcUtil.getPhoenixConnection();
+                }
+
+                @Override
+                public void close() throws Exception {
+                    if (phoenixConn != null) {
+                        phoenixConn.close();
+                    }
+                }
+
                 @Override
                 public void processElement(String value, ReadOnlyContext ctx, Collector<Tuple2<JSONObject, TableProcess>> out) throws Exception {
                     ReadOnlyBroadcastState<String, TableProcess> readTpBcState = ctx.getBroadcastState(bcMapStateDesc);
@@ -69,11 +113,30 @@ public class DimApp extends BaseAppV1{
 
                 }
 
+
                 @Override
                 public void processBroadcastElement(TableProcess tp, Context ctx, Collector<Tuple2<JSONObject, TableProcess>> out) throws Exception {
                     BroadcastState<String, TableProcess> tpBcState = ctx.getBroadcastState(bcMapStateDesc);
                     tpBcState.put(tp.getSourceTable(), tp);
-                    //todo: checkToPhoenix
+                    //checkToPhoenix: create tp table to phoenix
+                    checkToPhoenix(tp);
+
+                }
+
+                private void checkToPhoenix(TableProcess tp) throws SQLException {
+                    //create table if not exists sinkTable (f1 varchar, f2 varchar constraint primary key ("id")) bucket
+                    StringBuilder sql = new StringBuilder("create table if not exists ");
+                    sql.append(tp.getSinkTable()).append(" ( ")
+                        .append(tp.getSinkColumns().replaceAll("([^,]+)","$1 varchar"))
+                        .append(", constraint pk primary key(")
+                        .append(tp.getSinkPk() == null ? "id" : tp.getSinkPk()).append(")")
+                        .append(" ) ")
+                        .append(tp.getSinkExtend() == null ? "" : tp.getSinkExtend());
+                    System.out.println("sql+++"+sql);
+                    PreparedStatement ps = phoenixConn.prepareStatement(sql.toString());
+                    ps.execute();
+                    ps.close();
+
                 }
             });
     }

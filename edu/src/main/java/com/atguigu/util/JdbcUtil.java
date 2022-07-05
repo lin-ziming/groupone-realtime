@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 /**
  * @author shogunate
- * @description TODO
+ * @description JdbcUtil
  * @date 2022/7/5 11:48
  */
 public class JdbcUtil {
@@ -23,7 +23,7 @@ public class JdbcUtil {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Invalid phoenix driver");
         } catch (SQLException e) {
-            throw new RuntimeException("Check zookeeper or phoenix service is on");
+            throw new RuntimeException("Check zookeeper or phoenix service is on and hbase-site.xml");
         }
 
         return conn;

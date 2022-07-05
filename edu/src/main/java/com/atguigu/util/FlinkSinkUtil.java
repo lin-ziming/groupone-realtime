@@ -1,6 +1,7 @@
 package com.atguigu.util;
 
 import com.atguigu.common.Constant;
+import com.atguigu.sink.PhoenixSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
@@ -38,4 +39,8 @@ public class FlinkSinkUtil {
 				FlinkKafkaProducer.Semantic.EXACTLY_ONCE
 		);
 	}
+
+    public static PhoenixSink getPhoenixSink() {
+		return new PhoenixSink();
+    }
 }
