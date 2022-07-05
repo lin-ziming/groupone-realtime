@@ -13,6 +13,7 @@ import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
 import redis.clients.jedis.Jedis;
 
 import java.sql.SQLException;
+import java.util.Collections;
 
 /**
  * @author shogunate
@@ -54,9 +55,10 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> {
 
                 //input getDimData from both
                 JSONObject dim = DimUtil.getDimData(phoenixConn, jedisPoolClient, getTable(), getId(input));
-                //dimUtil.getDim from both
+                addDim(input, dim);
 
                 //result collections singleton input
+                resultFuture.complete(Collections.singletonList(input));
 
                 //close
                 if (phoenixConn != null) {

@@ -45,7 +45,7 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
 
 
 
-        SingleOutputStreamOperator<DWDInteractionVideoPlayBean> noDiwStream = WindowAllAndAggregate(beanStream);
+//        SingleOutputStreamOperator<DWDInteractionVideoPlayBean> noDiwStream = WindowAllAndAggregate(beanStream);
 //        noDiwStream.print();
 
 
@@ -56,21 +56,21 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
             new DimAsyncFunction<DWDInteractionVideoPlayBean>() {
                 @Override
                 public String getTable() {
-                    return null;
+                    return "DIM_VIDEO_INFO";
                 }
 
                 @Override
                 public String getId(DWDInteractionVideoPlayBean input) {
-                    return null;
+                    return "VIDEO_ID";
                 }
 
                 @Override
                 public void addDim(DWDInteractionVideoPlayBean input, JSONObject dim) {
-
+                    input.setChapterId(dim.getString("CHAPTER_ID"));
                 }
             },
             60,
-            TimeUnit.SECONDS);
+            TimeUnit.SECONDS).print();
     }
 
     private SingleOutputStreamOperator<DWDInteractionVideoPlayBean> WindowAllAndAggregate(SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream) {
