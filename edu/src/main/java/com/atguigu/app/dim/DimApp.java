@@ -133,7 +133,7 @@ public class DimApp extends BaseAppV1 {
                         .append(tp.getSinkPk() == null ? "id" : tp.getSinkPk()).append(")")
                         .append(" ) ")
                         .append(tp.getSinkExtend() == null ? "" : tp.getSinkExtend());
-                    System.out.println("sql+++"+sql);
+//                    System.out.println("sql+++"+sql);
                     PreparedStatement ps = phoenixConn.prepareStatement(sql.toString());
                     ps.execute();
                     ps.close();

@@ -74,7 +74,7 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
             .append(value.f1.getSinkColumns()).append(") values (")
             .append(value.f1.getSinkColumns().replaceAll("[^,]+", "?"))
             .append(")");
-        System.out.println("sinkSql---" + sql);
+//        System.out.println("sinkSql---" + sql);
 
         PreparedStatement ps = phoenixJdbcConn.prepareStatement(sql.toString());
 

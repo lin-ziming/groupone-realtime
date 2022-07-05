@@ -1,6 +1,5 @@
 package com.atguigu.util;
 
-import com.alibaba.fastjson.JSONObject;
 import com.atguigu.common.Constant;
 import com.google.common.base.CaseFormat;
 import org.apache.commons.beanutils.BeanUtils;
@@ -50,11 +49,11 @@ public class JdbcUtil {
 
         ArrayList<T> result = new ArrayList<>();
         PreparedStatement ps = conn.prepareStatement(sql);
-        ResultSet resultSet = ps.executeQuery();
 
-        for (int i = 0; i < args.length; i++) {
+        for (int i = 0; args != null && i < args.length; i++) {
             ps.setObject(i + 1, args[i]);
         }
+        ResultSet resultSet = ps.executeQuery();
 
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
@@ -69,25 +68,25 @@ public class JdbcUtil {
 
                 BeanUtils.setProperty(t, columnLabel, columnValue);
             }
+            result.add(t);
         }
-
         return result;
     }
 
-    public static void main(String[] args) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException {
-//        List<TableProcess> list = queryList(getJdbcConnection("com.mysql.jdbc.Driver", "jdbc:mysql://hadoop162:3306/gmall_config?useSSL=false", "root", "aaaaaa"),
-//            "select * from table_process",
+//    public static void main(String[] args) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException {
+//        List<TableProcess> list = queryList(getJdbcConnection("com.mysql.jdbc.Driver", "jdbc:mysql://hadoop302:3306/gmall_config?useSSL=false", "root", "123456"),
+//            "select * from table_process_edu_dim",
 //            null,
 //            TableProcess.class,
 //            true
 //        );
-
-        List<JSONObject> list = queryList(getPhoenixConnection(), "select * from course_info where id = ?", new Object[]{"1"}, JSONObject.class);
-
-        for (Object object : list) {
-            System.out.println(object);
-        }
-    }
+//
+////        List<JSONObject> list = queryList(getPhoenixConnection(), "select * from dim_course_info where id = ?", new Object[]{"46"}, JSONObject.class);
+//
+//        for (Object object : list) {
+//            System.out.println(object);
+//        }
+//    }
 }
 
 
