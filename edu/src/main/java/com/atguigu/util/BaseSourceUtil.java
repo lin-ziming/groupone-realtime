@@ -37,7 +37,7 @@ public class BaseSourceUtil {
         return tEnv.fromDataStream(stream);
     }
 
-    public static void readBaseSource(StreamExecutionEnvironment env, StreamTableEnvironment tEnv) {
+    public static void readBaseSource(StreamTableEnvironment tEnv) {
         tEnv.executeSql(
                 "create table base_source(" +
                         " `id` bigint, " +
@@ -48,6 +48,23 @@ public class BaseSourceUtil {
                         " 'username' = 'root', " +
                         " 'password' = '123456', " +
                         " 'table-name' = 'base_source', " +
+                        " 'lookup.cache.max-rows' = '10', " +
+                        " 'lookup.cache.ttl' = '30 s' " +
+                        ")"
+        );
+    }
+
+    public static void readBaseProvince(StreamTableEnvironment tEnv) {
+        tEnv.executeSql(
+                "create table base_province(" +
+                        " `id` bigint, " +
+                        " `name` string " +
+                        ") with (" +
+                        " 'connector' = 'jdbc', " +
+                        " 'url' = 'jdbc:mysql://hadoop302:3306/gmall', " +
+                        " 'username' = 'root', " +
+                        " 'password' = '123456', " +
+                        " 'table-name' = 'base_province', " +
                         " 'lookup.cache.max-rows' = '10', " +
                         " 'lookup.cache.ttl' = '30 s' " +
                         ")"
