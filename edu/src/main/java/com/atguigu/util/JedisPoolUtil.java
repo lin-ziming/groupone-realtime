@@ -21,7 +21,7 @@ public class JedisPoolUtil {
         return JedisPoolUtilHolder.instance;
     }
 
-    private JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302");
+    private final JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302");
 
     public Jedis getJedisPoolClient(){
 
@@ -36,11 +36,21 @@ public class JedisPoolUtil {
         jedisPoolConfig.setMaxIdle(10);
         jedisPoolConfig.setMinIdle(2);
         jedisPoolConfig.setMaxTotal(100);
-        jedisPoolConfig.setMaxWaitMillis(10*1000);
+        jedisPoolConfig.setMaxWaitMillis(10 * 1000);
         jedisPoolConfig.setTestOnBorrow(true);
         jedisPoolConfig.setTestOnReturn(true);
         jedisPoolConfig.setTestOnCreate(true);
 
         return jedisPoolConfig;
+    }
+
+    public static void main(String[] args) {
+        Jedis jedisPoolClient = getJedisPoolInstance().getJedisPoolClient();
+        String s = jedisPoolClient.get("dim_video_info:44");
+        System.out.println(s);
+
+        if (jedisPoolClient != null) {
+            jedisPoolClient.close();
+        }
     }
 }

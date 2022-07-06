@@ -45,16 +45,25 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> {
             public void run() {
                 //phoConn and redis conn
                 DruidDataSource druidDataSource = DruidPoolUtil.getDruidPoolInstance().getDruidDataSource();
-                DruidPooledConnection phoenixConn;
+                DruidPooledConnection phoenixConn = null;
+                Jedis jedisPoolClient = null;
+                JSONObject dim = null;
+
                 try {
                     phoenixConn = druidDataSource.getConnection();
                 } catch (SQLException e) {
                     throw new RuntimeException("Can't access Phoenix");
                 }
-                Jedis jedisPoolClient = JedisPoolUtil.getJedisPoolInstance().getJedisPoolClient();
+
+                try {
+                    jedisPoolClient = JedisPoolUtil.getJedisPoolInstance().getJedisPoolClient();
+                    dim = DimUtil.getDimData(phoenixConn, jedisPoolClient, getTable(), getId(input));
+                } catch (Exception e) {
+                    System.out.println("Check whether the redis is configured");
+                    e.printStackTrace();
+                }
 
                 //input getDimData from both
-                JSONObject dim = DimUtil.getDimData(phoenixConn, jedisPoolClient, getTable(), getId(input));
                 addDim(input, dim);
 
                 //result collections singleton input
