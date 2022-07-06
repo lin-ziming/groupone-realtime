@@ -36,13 +36,13 @@ public abstract class BaseAppV1 {
         env.getCheckpointConfig().setCheckpointTimeout(60 * 1000);
         env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
 
-        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(ckGroupIdJobName, topic));
-//        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(
-//                ckGroupIdJobName,
-//                topic,
-//                new Long[]{6000L, 6000L})); //可在此处指定每个分区的偏移量起始位置，从0分区开始指定
+//        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(ckGroupIdJobName, topic));
+        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(
+            ckGroupIdJobName,
+            topic,
+            new Long[]{2000L, 2000L})); //可在此处指定每个分区的偏移量起始位置，从0分区开始指定
 
-        handle(env,stream);
+        handle(env, stream);
 
         try {
             env.execute(ckGroupIdJobName);

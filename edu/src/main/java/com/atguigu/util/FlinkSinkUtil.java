@@ -4,6 +4,7 @@ import com.atguigu.annotation.NotSink;
 import com.atguigu.bean.KeywordBean;
 import com.atguigu.common.Constant;
 import com.atguigu.sink.PhoenixSink;
+import com.atguigu.bean.NoSink;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
@@ -54,7 +55,7 @@ public class FlinkSinkUtil {
 
 	public static PhoenixSink getPhoenixSink() {
 		return new PhoenixSink();
-	}
+    }
 
 	public static <T> SinkFunction<T> getClickHoseSink(String table, Class<T> tClass) {
 		//使用jdbcSink封装一个clickhouse sink

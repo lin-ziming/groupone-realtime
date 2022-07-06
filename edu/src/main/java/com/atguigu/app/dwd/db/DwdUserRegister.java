@@ -47,5 +47,6 @@ public class DwdUserRegister extends BaseSQLApp {
 
 
 		userInfo.executeInsert("dwd_user_register");
+
 	}
 }
