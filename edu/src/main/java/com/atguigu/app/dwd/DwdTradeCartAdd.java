@@ -33,7 +33,7 @@ public class DwdTradeCartAdd extends BaseSQLApp {
     protected void handle(StreamExecutionEnvironment env, StreamTableEnvironment tEnv) {
         readOdsDb(tEnv, APPNAME);
 
-        Long[] startOffsets = new Long[]{0L};
+        Long[] startOffsets = new Long[]{0L,0L};
         Table sessionIdAndSc = BaseSourceUtil.readOdsLog(env, tEnv, APPNAME, startOffsets);
         tEnv.createTemporaryView("session_sc", sessionIdAndSc);
 

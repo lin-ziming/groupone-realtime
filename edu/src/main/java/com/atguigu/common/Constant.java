@@ -8,7 +8,7 @@ public class Constant {
 	public static final String TOPIC_ODS_LOG = "ods_log";
 
 	public static final String CLICKHOUSE_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
-	public static final String CLICKHOUSE_URL = "jdbc:clickhouse://hadoop302:8123/gmall2022";
+	public static final String CLICKHOUSE_URL = "jdbc:clickhouse://hadoop302:8123/gmall";
 	public static final int REDIS_DIM_TTL = 2 * 24 * 60 * 60;  //维度ttl:2天
 
 	public static final String TOPIC_DWD_TRAFFIC_PAGE = "dwd_traffic_page";
@@ -21,7 +21,12 @@ public class Constant {
     public static final String TOPIC_DWD_TRADE_CART_ADD = "dwd_trade_cart_add";
     public static final String TOPIC_DWD_PAY_SUC_DETAIL = "dwd_trade_pay_suc_detail";
 	public static final String TOPIC_DWD_TRAFFIC_UV = "dwd_traffic_uv";
+	public static final String TOPIC_DWD_USER_REGISTER = "dwd_user_register";
 	public static final String TOPIC_DWD_ORDER_DETAIL = "dwd_trade_order_detail";
+	public static final String TOPIC_DWD_INTERACTION_COMMENT = "dwd_interaction_comment";
+	public static final String TOPIC_DWD_INTERACTION_REVIEW = "dwd_interaction_review";
+	public static final String DWS_TRAFFIC_UV_WINDOW = "dws_traffic_uv_window";
+	public static final String DWS_TRADE_SOURCE_PROVINCE_ORDER_WINDOW = "dws_trade_source_province_order_window";
 	public static final String TOPIC_DWD_TEST_SCORE_DETAIL = "dwd_test_score_detail";
 	public static final String TOPIC_DWD_TEST_PAPER_DETAIL = "dwd_test_paper_detail";
 }

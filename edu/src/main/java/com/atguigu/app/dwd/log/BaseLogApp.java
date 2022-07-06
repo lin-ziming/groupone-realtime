@@ -1,4 +1,4 @@
-package com.atguigu.app.dwd;
+package com.atguigu.app.dwd.log;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
