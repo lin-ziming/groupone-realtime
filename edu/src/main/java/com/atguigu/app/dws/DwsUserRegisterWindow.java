@@ -5,6 +5,7 @@ import com.atguigu.app.BaseAppV1;
 import com.atguigu.bean.UserRegisterBean;
 import com.atguigu.common.Constant;
 import com.atguigu.util.DateFormatUtil;
+import com.atguigu.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -72,7 +73,7 @@ public class DwsUserRegisterWindow extends BaseAppV1 {
 							}
 						}
 						)
-				;// TODO: 写入clickHouse
+				.addSink(FlinkSinkUtil.getClickHoseSink("dws_user_register_window",UserRegisterBean.class));
 
 	}
 }
