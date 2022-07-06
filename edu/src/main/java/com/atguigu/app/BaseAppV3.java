@@ -13,7 +13,7 @@ import java.util.*;
 
 public abstract class BaseAppV3 {
     /**
-     * 指定消费的topic与offsets
+     * 指定消费的topic与offsets,如果不想指定offsets可直接传new Long[]{}
      */
     public void init(int port, int p, String ckGroupIdJobName, Map<String, Long[]> topicsAndOffsets) {
         System.setProperty("HADOOP_USER_NAME", "atguigu");
