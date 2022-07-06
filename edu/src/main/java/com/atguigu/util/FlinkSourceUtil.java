@@ -1,6 +1,9 @@
 package com.atguigu.util;
 
 import com.atguigu.common.Constant;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
+import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -24,7 +27,7 @@ public class FlinkSourceUtil {
     }
 
     private static FlinkKafkaConsumer<String> getKafkaConsumer(String topic, Properties props) {
-        return new FlinkKafkaConsumer<String>(
+        return new FlinkKafkaConsumer<>(
                 topic,
                 /*new SimpleStringSchema()*/
                 // 自定义反序列化器
@@ -73,5 +76,18 @@ public class FlinkSourceUtil {
             specificStartOffsets.put(new KafkaTopicPartition(topic, i), startOffsets[i]);
         }
         return myConsumer.setStartFromSpecificOffsets(specificStartOffsets);
+    }
+
+    public static MySqlSource<String> getFlinkCDCSource() {
+        return MySqlSource.<String>builder()
+            .hostname("hadoop302")
+            .password("123456")
+            .username("root")
+            .databaseList("gmall_config")
+            .port(3306)
+            .tableList("gmall_config.table_process_edu_dim")
+            .deserializer(new JsonDebeziumDeserializationSchema())
+            .startupOptions(StartupOptions.initial())
+            .build();
     }
 }

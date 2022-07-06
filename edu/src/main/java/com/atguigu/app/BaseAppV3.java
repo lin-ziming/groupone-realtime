@@ -9,19 +9,17 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-public abstract class BaseAppV1 {
+import java.util.*;
+
+public abstract class BaseAppV3 {
     /**
-     *
-     * @param port 端口号
-     * @param p 并行度
-     * @param ckGroupIdJobName ck路径 消费者 jobName
-     * @param topic 要消费的topic
+     * 指定消费的topic与offsets,如果不想指定offsets可直接传new Long[]{}
      */
-    public void init(int port, int p, String ckGroupIdJobName, String topic){
-        System.setProperty("HADOOP_USER_NAME","atguigu");
+    public void init(int port, int p, String ckGroupIdJobName, Map<String, Long[]> topicsAndOffsets) {
+        System.setProperty("HADOOP_USER_NAME", "atguigu");
         Configuration conf = new Configuration();
-        conf.setInteger("rest.port",port);
-        //conf.setString("flink.hadoop.dfs.client.use.datanode.hostname","true"); //
+        conf.setInteger("rest.port", port);
+        conf.setString("flink.hadoop.dfs.client.use.datanode.hostname","true"); //
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(p);
@@ -36,13 +34,20 @@ public abstract class BaseAppV1 {
         env.getCheckpointConfig().setCheckpointTimeout(60 * 1000);
         env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
 
-//        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(ckGroupIdJobName, topic));
-        DataStreamSource<String> stream = env.addSource(FlinkSourceUtil.getKafkaSource(
-            ckGroupIdJobName,
-            topic,
-            new Long[]{2000L, 2000L})); //可在此处指定每个分区的偏移量起始位置，从0分区开始指定
+        Map<String, DataStreamSource<String>> streams = new HashMap<>();
+        for (Map.Entry<String, Long[]> entry : topicsAndOffsets.entrySet()) {
+            String topic = entry.getKey();
+            Long[] offsets = entry.getValue();
+            DataStreamSource<String> stream;
+            if (offsets.length == 0) {
+                stream = env.addSource(FlinkSourceUtil.getKafkaSource(ckGroupIdJobName, topic));
+            } else {
+                stream = env.addSource(FlinkSourceUtil.getKafkaSource(ckGroupIdJobName, topic, offsets));
+            }
+            streams.put(topic, stream);
+        }
 
-        handle(env, stream);
+        handle(env, streams);
 
         try {
             env.execute(ckGroupIdJobName);
@@ -52,6 +57,6 @@ public abstract class BaseAppV1 {
     }
 
     public abstract void handle(StreamExecutionEnvironment env,
-                                DataStreamSource<String> stream);
+                                Map<String, DataStreamSource<String>> streams);
 
 }
