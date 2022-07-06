@@ -78,7 +78,6 @@ public class DwsTrafficPageViewWindow extends BaseAppV1 {
 								bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
 								bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
 								bean.setTs(System.currentTimeMillis());
-								System.out.println(bean);
 								out.collect(bean);
 							}
 						}
