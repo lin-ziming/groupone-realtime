@@ -1,7 +1,8 @@
-package com.atguigu.app;
+package com.atguigu.app.dim;
 
 import com.alibaba.fastjson.JSONAware;
 import com.alibaba.fastjson.JSONObject;
+import com.atguigu.app.BaseAppV1;
 import com.atguigu.bean.TableProcess;
 import com.atguigu.common.Constant;
 import com.atguigu.util.FlinkSinkUtil;
@@ -36,7 +37,7 @@ import java.util.Set;
  * @description DimApp: Sourcing FlinkCDC filter dim table from ods_db.
  * @date 2022/7/4 15:07
  */
-public class DimApp extends BaseAppV1{
+public class DimApp extends BaseAppV1 {
 
     public static void main(String[] args) {
         new DimApp().init(11041, 2, "DimApp", Constant.TOPIC_ODS_DB);
