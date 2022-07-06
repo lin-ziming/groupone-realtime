@@ -27,7 +27,7 @@ public class FlinkSourceUtil {
     }
 
     private static FlinkKafkaConsumer<String> getKafkaConsumer(String topic, Properties props) {
-        return new FlinkKafkaConsumer<String>(
+        return new FlinkKafkaConsumer<>(
                 topic,
                 /*new SimpleStringSchema()*/
                 // 自定义反序列化器
