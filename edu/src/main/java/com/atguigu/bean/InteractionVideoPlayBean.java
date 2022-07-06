@@ -3,7 +3,6 @@ package com.atguigu.bean;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +14,6 @@ import java.util.Set;
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class InteractionVideoPlayBean {
     // 窗口起始时间
@@ -43,6 +41,7 @@ public class InteractionVideoPlayBean {
     Double playSecSum = 0D;
 
     //set<String> userId
+    @NoSink
     @Builder.Default
     Set<String> userId = new HashSet<>();
 

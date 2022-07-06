@@ -5,9 +5,11 @@ import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.bean.TableProcess;
 import com.atguigu.util.DruidPoolUtil;
+import com.atguigu.util.JedisPoolUtil;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+import redis.clients.jedis.Jedis;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,7 +23,7 @@ import java.sql.SQLException;
 public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProcess>> {
 
     private DruidPooledConnection phoenixJdbcConn;
-//    private Jedis jedisPoolClient;
+    private Jedis jedisPoolClient;
 
     @Override
     public void close() throws Exception {
@@ -29,9 +31,9 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
             phoenixJdbcConn.close();
         }
         //todo: Wait redis client start
-//        if (jedisPoolClient != null){
-//            jedisPoolClient.close();
-//        }
+        if (jedisPoolClient != null) {
+            jedisPoolClient.close();
+        }
     }
 
     @Override
@@ -41,8 +43,8 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
         DruidDataSource druidDataSource = druidPoolInstance.getDruidDataSource();
         phoenixJdbcConn = druidDataSource.getConnection();
 
-//        JedisPoolUtil jedisPoolInstance = JedisPoolUtil.getJedisPoolInstance();
-//        jedisPoolClient = jedisPoolInstance.getJedisPoolClient();
+        JedisPoolUtil jedisPoolInstance = JedisPoolUtil.getJedisPoolInstance();
+        jedisPoolClient = jedisPoolInstance.getJedisPoolClient();
     }
 
     @Override
@@ -50,19 +52,19 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
 
         writeToPhoenix(value);
 
-//        delRedisCache(value);
+        delRedisCache(value);
     }
 
-//     private void delRedisCache(Tuple2<JSONObject, TableProcess> value) {
-//
-//        if ("update".equals(value.f1.getOperate_type())) {
-//            Long id = value.f0.getLong("id");
-//            String table = value.f1.getSourceTable();
-//            String key = table + ":" + id;
-//
-//            jedisPoolClient.del(key);
-//        }
-//    }
+    private void delRedisCache(Tuple2<JSONObject, TableProcess> value) {
+
+        if ("update".equals(value.f1.getOperate_type())) {
+            Long id = value.f0.getLong("id");
+            String table = value.f1.getSourceTable();
+            String key = table + ":" + id;
+//            System.out.println("delRedis---" + key);
+            jedisPoolClient.del(key);
+        }
+    }
 
     private void writeToPhoenix(Tuple2<JSONObject, TableProcess> value) throws SQLException {
 
