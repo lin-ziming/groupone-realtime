@@ -32,7 +32,7 @@ public class DwdTradeOrderDetail extends BaseSQLApp {
         readOdsDb(tEnv, APPNAME);
 
         // 从ods_log获取session_id与sc_code
-        Long[] startOffsets = new Long[]{0L};
+        Long[] startOffsets = new Long[]{0L,0L};
         Table sessionIdAndSc = BaseSourceUtil.readOdsLog(env, tEnv, APPNAME, startOffsets);
         tEnv.createTemporaryView("session_sc", sessionIdAndSc);
 //        tEnv.sqlQuery("select sessionId,sc from session_sc").execute().print();
