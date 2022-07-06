@@ -46,7 +46,7 @@ public class DwdTradePaySucDetail extends BaseSQLApp {
 //        tEnv.sqlQuery("select session_id,id,pt from order_info").execute().print();
 
         // 从ods_log获取session_id与sc_code
-        Long[] startOffsets = new Long[]{0L};
+        Long[] startOffsets = new Long[]{0L,0L};
         Table sessionIdAndSc = BaseSourceUtil.readOdsLog(env, tEnv, APPNAME, startOffsets);
         tEnv.createTemporaryView("session_sc", sessionIdAndSc);
 //        tEnv.sqlQuery("select sessionId,sc from session_sc").execute().print();
