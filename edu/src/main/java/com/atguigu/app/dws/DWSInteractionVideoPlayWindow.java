@@ -2,7 +2,7 @@ package com.atguigu.app.dws;
 
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV1;
-import com.atguigu.bean.DWDInteractionVideoPlayBean;
+import com.atguigu.bean.InteractionVideoPlayBean;
 import com.atguigu.common.Constant;
 import com.atguigu.function.DimAsyncFunction;
 import com.atguigu.util.DateFormatUtil;
@@ -28,16 +28,16 @@ import java.util.concurrent.TimeUnit;
  * @description join dim table video_info on video_id
  * @date 2022/7/4 19:55
  */
-public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
+public class DWSInteractionVideoPlayWindow extends BaseAppV1 {
 
     public static void main(String[] args) {
-        new DWDInteractionVideoPlayWindow().init(11042, 2, "DWDInteractionVideoPlay", Constant.TOPIC_DWD_TRAFFIC_APPVIDEO);
+        new DWSInteractionVideoPlayWindow().init(11042, 2, "DWDInteractionVideoPlay", Constant.TOPIC_DWD_TRAFFIC_APPVIDEO);
     }
 
     @Override
     public void handle(StreamExecutionEnvironment env, DataStreamSource<String> stream) {
         //distinct uid per day and parse pojo
-        SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream = distinctUIDAndParsePojo(stream);
+        SingleOutputStreamOperator<InteractionVideoPlayBean> beanStream = distinctUIDAndParsePojo(stream);
 //        beanStream.print();
 
         //要先dim join chapter_info 获取维度后才聚合, keyby chapter_id
@@ -51,21 +51,21 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
 
     }
 
-    private void joinDimVideoInfo(SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream) {
+    private void joinDimVideoInfo(SingleOutputStreamOperator<InteractionVideoPlayBean> beanStream) {
         AsyncDataStream.unorderedWait(beanStream,
-            new DimAsyncFunction<DWDInteractionVideoPlayBean>() {
+            new DimAsyncFunction<InteractionVideoPlayBean>() {
                 @Override
                 public String getTable() {
                     return "DIM_VIDEO_INFO";
                 }
 
                 @Override
-                public String getId(DWDInteractionVideoPlayBean input) {
+                public String getId(InteractionVideoPlayBean input) {
                     return "VIDEO_ID";
                 }
 
                 @Override
-                public void addDim(DWDInteractionVideoPlayBean input, JSONObject dim) {
+                public void addDim(InteractionVideoPlayBean input, JSONObject dim) {
                     input.setChapterId(dim.getString("CHAPTER_ID"));
                 }
             },
@@ -73,14 +73,14 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
             TimeUnit.SECONDS).print();
     }
 
-    private SingleOutputStreamOperator<DWDInteractionVideoPlayBean> WindowAllAndAggregate(SingleOutputStreamOperator<DWDInteractionVideoPlayBean> beanStream) {
+    private SingleOutputStreamOperator<InteractionVideoPlayBean> WindowAllAndAggregate(SingleOutputStreamOperator<InteractionVideoPlayBean> beanStream) {
         return beanStream.assignTimestampsAndWatermarks(WatermarkStrategy
-                .<DWDInteractionVideoPlayBean>forBoundedOutOfOrderness(Duration.ofSeconds(3))
-                .withTimestampAssigner((bean,ts)->bean.getTs()))
+            .<InteractionVideoPlayBean>forBoundedOutOfOrderness(Duration.ofSeconds(3))
+            .withTimestampAssigner((bean, ts) -> bean.getTs()))
             .windowAll(TumblingEventTimeWindows.of(Time.seconds(5)))
-            .reduce(new ReduceFunction<DWDInteractionVideoPlayBean>() {
+            .reduce(new ReduceFunction<InteractionVideoPlayBean>() {
                         @Override
-                        public DWDInteractionVideoPlayBean reduce(DWDInteractionVideoPlayBean value1, DWDInteractionVideoPlayBean value2) throws Exception {
+                        public InteractionVideoPlayBean reduce(InteractionVideoPlayBean value1, InteractionVideoPlayBean value2) throws Exception {
 
 //                            value1.setViewerCount(value1.getViewerCount() + value2.getViewerCount());
                             value1.getUserId().addAll(value2.getUserId());
@@ -89,15 +89,15 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
                             return value1;
                         }
                     },
-                new AllWindowFunction<DWDInteractionVideoPlayBean, DWDInteractionVideoPlayBean, TimeWindow>() {
+                new AllWindowFunction<InteractionVideoPlayBean, InteractionVideoPlayBean, TimeWindow>() {
                     @Override
-                    public void apply(TimeWindow window, Iterable<DWDInteractionVideoPlayBean> values, Collector<DWDInteractionVideoPlayBean> out) throws Exception {
-                        DWDInteractionVideoPlayBean bean = values.iterator().next();
+                    public void apply(TimeWindow window, Iterable<InteractionVideoPlayBean> values, Collector<InteractionVideoPlayBean> out) throws Exception {
+                        InteractionVideoPlayBean bean = values.iterator().next();
 
                         bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
                         bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
                         bean.setTs(System.currentTimeMillis());
-                        bean.setViewerCount((long)bean.getUserId().size());
+                        bean.setViewerCount((long) bean.getUserId().size());
                         bean.setAvgSecPerViewer(Double.valueOf((new DecimalFormat("0.0000").format(bean.getPlaySecSum() / bean.getViewerCount()))));
 
                         out.collect(bean);
@@ -107,18 +107,18 @@ public class DWDInteractionVideoPlayWindow extends BaseAppV1 {
 
     }
 
-    private SingleOutputStreamOperator<DWDInteractionVideoPlayBean> distinctUIDAndParsePojo(DataStreamSource<String> stream) {
+    private SingleOutputStreamOperator<InteractionVideoPlayBean> distinctUIDAndParsePojo(DataStreamSource<String> stream) {
 
         return stream.map(JSONObject::parseObject)
             .keyBy(json -> json.getJSONObject("common").getString("uid"))
-            .process(new KeyedProcessFunction<String, JSONObject, DWDInteractionVideoPlayBean>() {
+            .process(new KeyedProcessFunction<String, JSONObject, InteractionVideoPlayBean>() {
 
                 @Override
-                public void processElement(JSONObject value, Context ctx, Collector<DWDInteractionVideoPlayBean> out) throws Exception {
+                public void processElement(JSONObject value, Context ctx, Collector<InteractionVideoPlayBean> out) throws Exception {
                     JSONObject appVideo = value.getJSONObject("appVideo");
 
                     //直接统计
-                    DWDInteractionVideoPlayBean bean = DWDInteractionVideoPlayBean.builder()
+                    InteractionVideoPlayBean bean = InteractionVideoPlayBean.builder()
                         .playSecSum(appVideo.getDouble("play_sec"))
                         .videoId(appVideo.getString("video_id"))
                         .playCount(1L)

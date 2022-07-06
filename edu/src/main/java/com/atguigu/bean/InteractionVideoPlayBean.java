@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DWDInteractionVideoPlayBean {
+public class InteractionVideoPlayBean {
     // 窗口起始时间
     String stt;
     // 窗口结束时间
