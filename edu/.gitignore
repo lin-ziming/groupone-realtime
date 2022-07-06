@@ -3,4 +3,5 @@
 .idea
 edu.iml
 */target
+/target
 dependency-reduced-pom.xml
