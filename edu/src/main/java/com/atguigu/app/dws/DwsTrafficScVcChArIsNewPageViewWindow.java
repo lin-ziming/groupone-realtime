@@ -3,7 +3,6 @@ package com.atguigu.app.dws;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV2;
-import com.atguigu.app.BaseAppV3;
 import com.atguigu.bean.TrafficPageViewBean;
 import com.atguigu.function.DimAsyncFunction;
 import com.atguigu.util.DateFormatUtil;
