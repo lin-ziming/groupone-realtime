@@ -19,7 +19,6 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
-
 import java.time.Duration;
 
 public class DwsTestQuestionAnswerWindow extends BaseAppV1 {
