@@ -7,6 +7,7 @@ import com.atguigu.bean.TestPaperGradeBean;
 import com.atguigu.common.Constant;
 import com.atguigu.util.AtguiguUtil;
 import com.atguigu.util.DateFormatUtil;
+import com.atguigu.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -40,6 +41,12 @@ public class DwsTestPaperGradeWindow extends BaseAppV1 {
         SingleOutputStreamOperator<TestPaperGradeBean> aggregateStream = windowAndAggregate(beanStream);
         aggregateStream.print();
 
+        writeToClickhouse(aggregateStream);
+
+    }
+
+    private void writeToClickhouse(SingleOutputStreamOperator<TestPaperGradeBean> aggregateStream) {
+        aggregateStream.addSink(FlinkSinkUtil.getClickHoseSink("dws_test_paper_grade_window",TestPaperGradeBean.class));
     }
 
 
@@ -53,10 +60,10 @@ public class DwsTestPaperGradeWindow extends BaseAppV1 {
                     @Override
                     public TestPaperGradeBean reduce(TestPaperGradeBean value1, TestPaperGradeBean value2) throws Exception {
 
-                        value1.setGreatGroup(value1.getGreatGroup()+value2.getGreatGroup());
-                        value1.setGoodGroup(value1.getGoodGroup()+value2.getGoodGroup());
-                        value1.setMidGroup(value1.getMidGroup()+value2.getMidGroup());
-                        value1.setPoorGroup(value1.getPoorGroup()+value2.getPoorGroup());
+                        value1.setGreatGroup(value1.getGreatGroup() + value2.getGreatGroup());
+                        value1.setGoodGroup(value1.getGoodGroup() + value2.getGoodGroup());
+                        value1.setMidGroup(value1.getMidGroup() + value2.getMidGroup());
+                        value1.setPoorGroup(value1.getPoorGroup() + value2.getPoorGroup());
 
                         return value1;
                     }
@@ -68,7 +75,7 @@ public class DwsTestPaperGradeWindow extends BaseAppV1 {
                         bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
                         bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
 
-                        bean.setCt(bean.getGreatGroup()+bean.getGoodGroup()+bean.getMidGroup()+bean.getPoorGroup());
+                        bean.setCt(bean.getGreatGroup() + bean.getGoodGroup() + bean.getMidGroup() + bean.getPoorGroup());
 
                         bean.setTs(System.currentTimeMillis());
 
@@ -100,12 +107,12 @@ public class DwsTestPaperGradeWindow extends BaseAppV1 {
                             goodGroup = 1;
                         } else if (score < 70 && score >= 60) {
                             midGroup = 1;
-                        } else {
+                        } else if (score < 60) {
                             poorGroup = 1;
                         }
 
 
-                        return new TestPaperGradeBean("","",paperId,greatGroup,goodGroup,midGroup,poorGroup,0,ts);
+                        return new TestPaperGradeBean("", "", paperId, greatGroup, goodGroup, midGroup, poorGroup, 0, ts);
                     }
                 });
 

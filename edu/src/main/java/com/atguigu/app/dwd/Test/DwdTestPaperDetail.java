@@ -9,7 +9,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 public class DwdTestPaperDetail extends BaseSQLApp {
     public static void main(String[] args) {
-        new DwdTestPaperDetail().init(2016, 4, "DwdTestPaperDetail", 10);
+        new DwdTestPaperDetail().init(2026, 2, "DwdTestPaperDetail", 10);
     }
 
     @Override

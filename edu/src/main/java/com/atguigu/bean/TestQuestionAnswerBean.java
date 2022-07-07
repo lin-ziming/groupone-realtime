@@ -32,22 +32,16 @@ public class TestQuestionAnswerBean {
         @Builder.Default
         Double correctPercent = 0D;
 
-//        //正确答题独立用户数
-//        @Builder.Default
-//        Set<String>  correctUV= new HashSet<>();
-//
-//        Integer correctUvCt = 0 ;
-//
-//        //答题独立用户数
-//        @Builder.Default
-//        Set<String>  answerUV= new HashSet<>();
-//
-//        Integer answerUvCt = 0 ;
-//
-//
-//        //正确答题用户占比
-//        @Builder.Default
-//        Double correctUVPercent= 0D;
+        //正确答题独立用户数
+        @Builder.Default
+        Integer correctUvCt = 0 ;
+
+        //答题独立用户数
+        Integer answerUvCt = 0 ;
+
+        //正确答题用户占比
+        @Builder.Default
+        Double correctUvPercent= 0D;
 
         // 时间戳
         Long ts;

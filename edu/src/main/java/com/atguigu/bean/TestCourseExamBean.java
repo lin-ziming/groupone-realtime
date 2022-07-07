@@ -1,5 +1,6 @@
 package com.atguigu.bean;
 
+import com.atguigu.annotation.NotSink;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class TestCourseExamBean {
     String courseId;
 
     //set<String> userId
-    @NoSink
+    @NotSink
     @Builder.Default
     Set<String> userIdSet = new HashSet<>();
 
@@ -40,7 +41,7 @@ public class TestCourseExamBean {
 
     //平均时长
     @Builder.Default
-    Double avgDuringTime = 0D;
+    Double avgDuringSec = 0D;
 
     // 时间戳
     Long ts;

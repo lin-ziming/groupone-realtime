@@ -7,6 +7,7 @@ import com.atguigu.bean.TestPaperExamBean;
 import com.atguigu.common.Constant;
 import com.atguigu.util.AtguiguUtil;
 import com.atguigu.util.DateFormatUtil;
+import com.atguigu.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -42,8 +43,12 @@ public class DwsTestPaperExamWindow extends BaseAppV1 {
         SingleOutputStreamOperator<TestPaperExamBean> aggregateStream = windowAndAggregate(beanStream);
         aggregateStream.print();
 
-//        writeToClickhouse(aggregateStream);
+        writeToClickhouse(aggregateStream);
 
+    }
+
+    private void writeToClickhouse(SingleOutputStreamOperator<TestPaperExamBean> aggregateStream) {
+        aggregateStream.addSink(FlinkSinkUtil.getClickHoseSink("dws_test_paper_exam_window",TestPaperExamBean.class));
     }
 
     private SingleOutputStreamOperator<TestPaperExamBean> windowAndAggregate(SingleOutputStreamOperator<TestPaperExamBean> beanStream) {
@@ -70,7 +75,7 @@ public class DwsTestPaperExamWindow extends BaseAppV1 {
 
                         bean.setExamNum(bean.getUserIdSet().size());
 
-                        bean.setAvgDuringTime((double) bean.getDurationSec() / bean.getExamNum());
+                        bean.setAvgDuringSec((double) bean.getDurationSec() / bean.getExamNum());
                         bean.setAvgScore(bean.getScore() / bean.getExamNum());
 
                         bean.setTs(System.currentTimeMillis());

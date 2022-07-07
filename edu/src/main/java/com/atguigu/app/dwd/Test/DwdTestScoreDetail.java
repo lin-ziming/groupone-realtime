@@ -9,7 +9,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 public class DwdTestScoreDetail extends BaseSQLApp {
     public static void main(String[] args) {
-        new DwdTestScoreDetail().init(2102, 10, "DwdTestScoreDetail", 10);
+        new DwdTestScoreDetail().init(2202, 2, "DwdTestScoreDetail", 10);
     }
 
     @Override

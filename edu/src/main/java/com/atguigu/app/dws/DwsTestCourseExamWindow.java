@@ -7,6 +7,7 @@ import com.atguigu.bean.TestCourseExamBean;
 import com.atguigu.common.Constant;
 import com.atguigu.util.AtguiguUtil;
 import com.atguigu.util.DateFormatUtil;
+import com.atguigu.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -29,7 +30,7 @@ import java.util.HashSet;
 
 public class DwsTestCourseExamWindow extends BaseAppV1 {
     public static void main(String[] args) {
-        new DwsTestCourseExamWindow().init(3505, 2, "DwsCourseExamWindow", Constant.TOPIC_DWD_TEST_SCORE_DETAIL);
+        new DwsTestCourseExamWindow().init(3507, 2, "DwsCourseExamWindow", Constant.TOPIC_DWD_TEST_SCORE_DETAIL);
     }
 
     @Override
@@ -42,8 +43,12 @@ public class DwsTestCourseExamWindow extends BaseAppV1 {
         SingleOutputStreamOperator<TestCourseExamBean> aggregateStream = windowAndAggregate(beanStream);
         aggregateStream.print();
 
-//        writeToClickhouse(aggregateStream);
+        writeToClickhouse(aggregateStream);
 
+    }
+
+    private void writeToClickhouse(SingleOutputStreamOperator<TestCourseExamBean> aggregateStream) {
+        aggregateStream.addSink(FlinkSinkUtil.getClickHoseSink("dws_test_course_exam_window",TestCourseExamBean.class));
     }
 
     private SingleOutputStreamOperator<TestCourseExamBean> windowAndAggregate(SingleOutputStreamOperator<TestCourseExamBean> beanStream) {
@@ -70,7 +75,7 @@ public class DwsTestCourseExamWindow extends BaseAppV1 {
 
                         bean.setExamNum(bean.getUserIdSet().size());
 
-                        bean.setAvgDuringTime((double) bean.getDurationSec() / bean.getExamNum());
+                        bean.setAvgDuringSec((double) bean.getDurationSec() / bean.getExamNum());
                         bean.setAvgScore(bean.getScore() / bean.getExamNum());
 
                         bean.setTs(System.currentTimeMillis());

@@ -1,5 +1,7 @@
 package com.atguigu.common;
 
+import com.atguigu.bean.TestPaperExamBean;
+
 public class Constant {
 	public static final String KAFKA_BROKERS = "hadoop302:9092,hadoop303:9092,hadoop304:9092";
 	public static final String PHOENIX_DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
