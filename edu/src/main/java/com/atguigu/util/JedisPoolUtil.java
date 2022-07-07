@@ -27,8 +27,8 @@ public class JedisPoolUtil {
         return jedisPoolUtil;
     }
 
-//    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302", 6379, 10000);
-    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302");
+    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302", 6379, 20000);
+//    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302");
 
     public Jedis getJedisPoolClient() {
 
@@ -50,10 +50,10 @@ public class JedisPoolUtil {
     private static JedisPoolConfig getJedisPoolConfig() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
 
-        jedisPoolConfig.setMaxIdle(10);
-        jedisPoolConfig.setMinIdle(2);
-        jedisPoolConfig.setMaxTotal(100);
-        jedisPoolConfig.setMaxWaitMillis(10 * 1000);
+        jedisPoolConfig.setMaxIdle(96);
+        jedisPoolConfig.setMinIdle(4);
+        jedisPoolConfig.setMaxTotal(96);
+        jedisPoolConfig.setMaxWaitMillis(20 * 1000);
         jedisPoolConfig.setTestOnBorrow(true);
         jedisPoolConfig.setTestOnReturn(true);
         jedisPoolConfig.setTestOnCreate(true);
