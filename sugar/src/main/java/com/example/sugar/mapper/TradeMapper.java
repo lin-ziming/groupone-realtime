@@ -1,5 +1,6 @@
 package com.example.sugar.mapper;
 
+import com.example.sugar.bean.InteractionPlayTime;
 import com.example.sugar.bean.Kw;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
 import org.apache.ibatis.annotations.Select;
@@ -27,4 +28,15 @@ public interface TradeMapper {
         "WHERE toYYYYMMDD(stt) = #{date}\n" +
         "GROUP BY is_new")
     List<TrafficVisitorTypeStats> statsTrafficVisitorTypeStats(int date);
+
+
+
+    @Select("SELECT " +
+        " chapter_name , " +
+        " sum(play_sec_sum)/60/60 play_hours, " +
+        " sum(avg_sec_per_viewer)/60/60 play_hours_per_viewer " +
+        " FROM dws_interaction_chapter_video_play_window " +
+        " WHERE toYYYYMMDD(stt) = #{date} and chapter_id = 1000" +
+        " GROUP BY chapter_name")
+    List<InteractionPlayTime> statsInteractionPlayTime(int date);
 }

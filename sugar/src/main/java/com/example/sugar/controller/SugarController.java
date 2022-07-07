@@ -2,6 +2,7 @@ package com.example.sugar.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.sugar.bean.InteractionPlayTime;
 import com.example.sugar.bean.Kw;
 import com.example.sugar.service.TradeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,20 @@ public class SugarController {
         }
 
         result.put("data",data);
+        return result.toJSONString();
+    }
+
+    @RequestMapping("/sugar/playHours")
+    public String playHours(int date){
+        List<InteractionPlayTime> interactionPlayTimes = tradeService.statsInteractionPlayTime(date);
+        JSONObject result = new JSONObject();
+        result.put("status",0);
+        result.put("msg","");
+
+        JSONObject data = new JSONObject();
+        JSONArray categories = new JSONArray();
+        JSONArray series = new JSONArray();
+
         return result.toJSONString();
     }
 }
