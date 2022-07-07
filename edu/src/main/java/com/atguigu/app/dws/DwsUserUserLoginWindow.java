@@ -51,7 +51,9 @@ public class DwsUserUserLoginWindow extends BaseAppV1 {
 	}
 
 	private void writeToclickHouse(SingleOutputStreamOperator<UserActiveAndBackBean> resultStream) {
-		resultStream.addSink(FlinkSinkUtil.getClickHoseSink("dws_user_user_active_and_back_window", UserActiveAndBackBean.class));
+		resultStream.addSink(FlinkSinkUtil.getClickHoseSink(
+				"dws_user_user_active_and_back_window",
+				UserActiveAndBackBean.class));
 	}
 
 	private SingleOutputStreamOperator<UserActiveAndBackBean> windowAndReduce(SingleOutputStreamOperator<UserActiveAndBackBean> beanStream) {
