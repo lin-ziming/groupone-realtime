@@ -16,15 +16,14 @@ import java.util.List;
  */
 public class DimUtil {
     public static JSONObject getDimData(DruidPooledConnection phoenixConn, Jedis jedisPoolClient, String table, String id) {
-        //readRedis readPho writeRedis
-        JSONObject dim;
-        dim = readFromRedis(jedisPoolClient, table, id);
+
+        JSONObject dim = readFromRedis(jedisPoolClient, table, id);
         if (dim == null) {
             dim = readFromPhoenix(phoenixConn, table, id);
+//            System.out.println("read from phoenix---" + table + "---" + id + "dim+++" + dim);
             writeToRedis(jedisPoolClient, table, id, dim);
-            System.out.println("read from phoenix---" + table + "---" + id);
-        } else {
-            System.out.println("read from redis---" + table + "---" + id);
+        }else {
+//            System.out.println("read from redis---" + table + "---" + id);
         }
         return dim;
     }
@@ -61,6 +60,7 @@ public class DimUtil {
         JSONObject dim = null;
 
         String value = jedisPoolClient.get(key);
+
         if (value != null) {
             dim = JSONObject.parseObject(value);
         }
