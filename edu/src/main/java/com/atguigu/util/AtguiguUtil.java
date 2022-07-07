@@ -21,4 +21,11 @@ public class AtguiguUtil {
 		}
 		return list;
 	}
+
+
+	public static boolean compareLTZ(String one, String two) {
+		String oneNoZ = one.replace("Z", "");
+		String twoNoZ = two.replace("Z", "");
+		return oneNoZ.compareTo(twoNoZ) >= 0;
+	}
 }
