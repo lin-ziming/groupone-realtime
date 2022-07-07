@@ -31,6 +31,8 @@ public class Dws_DwsTrafficSourceKeywordPageViewWindow extends BaseSQLApp {
             "watermark for et as et - interval '3' second " +
             ")" + SQLUtil.getKafkaSourceDDL(Constant.TOPIC_DWD_TRAFFIC_PAGE, "Dws_DwsTrafficSourceKeywordPageViewWindow"));
 
+        //tEnv.sqlQuery("select * from page_log").execute().print();
+
         // 2. 过滤出搜索记录, 取出搜索关键词
         Table t1 = tEnv.sqlQuery("select " +
             "page['item'] keyword," +
