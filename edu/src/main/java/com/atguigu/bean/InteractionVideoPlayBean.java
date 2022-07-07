@@ -1,5 +1,6 @@
 package com.atguigu.bean;
 
+import com.atguigu.annotation.NotSink;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,8 +29,8 @@ public class InteractionVideoPlayBean {
     String chapterName;
 
     //video_id
-    //no sink
-    @NoSink
+    //no sinkt
+    @NotSink
     String videoId;
 
     //视频播放次数
@@ -41,7 +42,7 @@ public class InteractionVideoPlayBean {
     Double playSecSum = 0D;
 
     //set<String> userId
-    @NoSink
+    @NotSink
     @Builder.Default
     Set<String> userId = new HashSet<>();
 

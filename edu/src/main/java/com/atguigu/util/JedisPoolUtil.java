@@ -11,14 +11,15 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 public class JedisPoolUtil {
 
-    private JedisPoolUtil(){}
+    private JedisPoolUtil() {
+    }
 
     private volatile static JedisPoolUtil jedisPoolUtil;
 
-    public static JedisPoolUtil getJedisPoolInstance(){
-        if (jedisPoolUtil == null){
-            synchronized (JedisPoolUtil.class){
-                if (jedisPoolUtil == null){
+    public static JedisPoolUtil getJedisPoolInstance() {
+        if (jedisPoolUtil == null) {
+            synchronized (JedisPoolUtil.class) {
+                if (jedisPoolUtil == null) {
                     jedisPoolUtil = new JedisPoolUtil();
                 }
             }
@@ -26,11 +27,22 @@ public class JedisPoolUtil {
         return jedisPoolUtil;
     }
 
-    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302", 6379, 60000);
+    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302", 6379, 20000);
+//    private static JedisPool jedisPool = new JedisPool(JedisPoolUtil.getJedisPoolConfig(), "hadoop302");
 
-    public Jedis getJedisPoolClient(){
+    public Jedis getJedisPoolClient() {
 
-        Jedis client = jedisPool.getResource();
+        //有资源再给jedis对象, 让对象等资源
+        Jedis client = null;
+        try {
+            if (jedisPool != null) {
+                client = jedisPool.getResource();
+            }
+        } catch (Exception e) {
+            System.out.println("获取redis失败");
+            e.printStackTrace();
+        }
+
         client.select(1);
         return client;
     }
@@ -38,10 +50,10 @@ public class JedisPoolUtil {
     private static JedisPoolConfig getJedisPoolConfig() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
 
-        jedisPoolConfig.setMaxIdle(10);
-        jedisPoolConfig.setMinIdle(2);
-        jedisPoolConfig.setMaxTotal(100);
-        jedisPoolConfig.setMaxWaitMillis(60 * 1000);
+        jedisPoolConfig.setMaxIdle(96);
+        jedisPoolConfig.setMinIdle(4);
+        jedisPoolConfig.setMaxTotal(96);
+        jedisPoolConfig.setMaxWaitMillis(20 * 1000);
         jedisPoolConfig.setTestOnBorrow(true);
         jedisPoolConfig.setTestOnReturn(true);
         jedisPoolConfig.setTestOnCreate(true);

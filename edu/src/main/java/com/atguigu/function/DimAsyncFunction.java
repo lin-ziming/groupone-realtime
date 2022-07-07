@@ -3,10 +3,7 @@ package com.atguigu.function;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSONObject;
-import com.atguigu.util.DimUtil;
-import com.atguigu.util.DruidPoolUtil;
-import com.atguigu.util.JedisPoolUtil;
-import com.atguigu.util.ThreadPoolUtil;
+import com.atguigu.util.*;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
@@ -70,6 +67,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> {
                 }
 
                 JSONObject dim = DimUtil.getDimData(phoenixConn, jedisPoolClient, getTable(), getId(input));
+//                JSONObject dim = DimUtil2.readDim(jedisPoolClient, phoenixConn,  getTable(), getId(input));
 
                 //input getDimData from both
                 addDim(input, dim);
