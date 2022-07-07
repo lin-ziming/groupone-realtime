@@ -12,7 +12,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @Builder
-public class QuestionAnswerBean {
+public class TestQuestionAnswerBean {
         // 窗口起始时间
         String stt;
         // 窗口结束时间

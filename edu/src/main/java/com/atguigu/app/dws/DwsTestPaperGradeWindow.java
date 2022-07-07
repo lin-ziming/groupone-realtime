@@ -3,8 +3,7 @@ package com.atguigu.app.dws;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV1;
-import com.atguigu.bean.CourseExamBean;
-import com.atguigu.bean.CourseExamBean;
+import com.atguigu.bean.TestPaperGradeBean;
 import com.atguigu.common.Constant;
 import com.atguigu.util.AtguiguUtil;
 import com.atguigu.util.DateFormatUtil;
@@ -25,12 +24,10 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashSet;
 
-public class DwsCourseExamWindow extends BaseAppV1 {
+public class DwsTestPaperGradeWindow extends BaseAppV1 {
     public static void main(String[] args) {
-        new DwsCourseExamWindow().init(3505, 2, "DwsCourseExamWindow", Constant.TOPIC_DWD_TEST_SCORE_DETAIL);
+        new DwsTestPaperGradeWindow().init(3504, 2, "DwsPaperGradeWindow", Constant.TOPIC_DWD_TEST_SCORE_DETAIL);
     }
 
     @Override
@@ -38,65 +35,80 @@ public class DwsCourseExamWindow extends BaseAppV1 {
 
         SingleOutputStreamOperator<JSONObject> distinctStream = distinctByTestScoreDetail(stream);
 
-        SingleOutputStreamOperator<CourseExamBean> beanStream = parseToPOJO(distinctStream);
+        SingleOutputStreamOperator<TestPaperGradeBean> beanStream = parseToPOJO(distinctStream);
 
-        SingleOutputStreamOperator<CourseExamBean> aggregateStream = windowAndAggregate(beanStream);
+        SingleOutputStreamOperator<TestPaperGradeBean> aggregateStream = windowAndAggregate(beanStream);
         aggregateStream.print();
-
-//        writeToClickhouse(aggregateStream);
 
     }
 
-    private SingleOutputStreamOperator<CourseExamBean> windowAndAggregate(SingleOutputStreamOperator<CourseExamBean> beanStream) {
-        return beanStream.
-                assignTimestampsAndWatermarks(WatermarkStrategy.<CourseExamBean>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+
+    private SingleOutputStreamOperator<TestPaperGradeBean> windowAndAggregate(SingleOutputStreamOperator<TestPaperGradeBean> beanStream) {
+        return beanStream
+                .assignTimestampsAndWatermarks(WatermarkStrategy.<TestPaperGradeBean>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                         .withTimestampAssigner((bean, ts) -> bean.getTs()))
-                .keyBy(bean -> bean.getCourseId())
+                .keyBy(TestPaperGradeBean::getPaperId)
                 .window(TumblingEventTimeWindows.of(Time.hours(2)))
-                .reduce(new ReduceFunction<CourseExamBean>() {
+                .reduce(new ReduceFunction<TestPaperGradeBean>() {
                     @Override
-                    public CourseExamBean reduce(CourseExamBean value1, CourseExamBean value2) throws Exception {
-                        value1.setDurationSec(value1.getDurationSec() + value2.getDurationSec());
-                        value1.setScore(value1.getScore() + value2.getScore());
-                        value1.getUserIdSet().addAll(value2.getUserIdSet());
+                    public TestPaperGradeBean reduce(TestPaperGradeBean value1, TestPaperGradeBean value2) throws Exception {
+
+                        value1.setGreatGroup(value1.getGreatGroup()+value2.getGreatGroup());
+                        value1.setGoodGroup(value1.getGoodGroup()+value2.getGoodGroup());
+                        value1.setMidGroup(value1.getMidGroup()+value2.getMidGroup());
+                        value1.setPoorGroup(value1.getPoorGroup()+value2.getPoorGroup());
+
                         return value1;
                     }
-                }, new WindowFunction<CourseExamBean, CourseExamBean, String, TimeWindow>() {
+                }, new WindowFunction<TestPaperGradeBean, TestPaperGradeBean, String, TimeWindow>() {
                     @Override
-                    public void apply(String s, TimeWindow window, Iterable<CourseExamBean> input, Collector<CourseExamBean> out) throws Exception {
-                        CourseExamBean bean = input.iterator().next();
+                    public void apply(String s, TimeWindow window, Iterable<TestPaperGradeBean> input, Collector<TestPaperGradeBean> out) throws Exception {
+                        TestPaperGradeBean bean = input.iterator().next();
 
                         bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
                         bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
 
-                        bean.setExamNum(bean.getUserIdSet().size());
-
-                        bean.setAvgDuringTime((double) bean.getDurationSec() / bean.getExamNum());
-                        bean.setAvgScore(bean.getScore() / bean.getExamNum());
+                        bean.setCt(bean.getGreatGroup()+bean.getGoodGroup()+bean.getMidGroup()+bean.getPoorGroup());
 
                         bean.setTs(System.currentTimeMillis());
 
                         out.collect(bean);
                     }
                 });
-
-
     }
 
-    private SingleOutputStreamOperator<CourseExamBean> parseToPOJO(SingleOutputStreamOperator<JSONObject> distinctStream) {
-        return distinctStream.map(new MapFunction<JSONObject, CourseExamBean>() {
-            @Override
-            public CourseExamBean map(JSONObject value) throws Exception {
-                return CourseExamBean.builder()
-//                                .examId(value.getString("id"))
-                        .courseId(value.getString("course_id"))
-                        .userIdSet(new HashSet<>(Collections.singleton(value.getString("user_id"))))
-                        .durationSec(value.getLong("duration_sec"))
-                        .score(value.getDouble("total_score"))
-                        .ts(value.getLong("ts") * 1000)
-                        .build();
-            }
-        });
+    private SingleOutputStreamOperator<TestPaperGradeBean> parseToPOJO(SingleOutputStreamOperator<JSONObject> distinctStream) {
+        return distinctStream
+                .map(new MapFunction<JSONObject, TestPaperGradeBean>() {
+                    private Double score;
+                    private long ts;
+
+                    @Override
+                    public TestPaperGradeBean map(JSONObject value) throws Exception {
+                        String paperId = value.getString("paper_id");
+                        score = value.getDouble("total_score");
+                        ts = value.getLong("ts") * 1000;
+
+                        Integer poorGroup = 0;
+                        Integer midGroup = 0;
+                        Integer goodGroup = 0;
+                        Integer greatGroup = 0;
+
+                        if (score >= 80) {
+                            greatGroup = 1;
+                        } else if (score < 80 && score >= 70) {
+                            goodGroup = 1;
+                        } else if (score < 70 && score >= 60) {
+                            midGroup = 1;
+                        } else {
+                            poorGroup = 1;
+                        }
+
+
+                        return new TestPaperGradeBean("","",paperId,greatGroup,goodGroup,midGroup,poorGroup,0,ts);
+                    }
+                });
+
     }
 
     private SingleOutputStreamOperator<JSONObject> distinctByTestScoreDetail(DataStreamSource<String> stream) {
@@ -146,6 +158,4 @@ public class DwsCourseExamWindow extends BaseAppV1 {
                     }
                 });
     }
-
-
 }

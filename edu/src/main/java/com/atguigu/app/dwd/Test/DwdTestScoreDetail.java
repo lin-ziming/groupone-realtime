@@ -1,6 +1,5 @@
 package com.atguigu.app.dwd.Test;
 
-
 import com.atguigu.app.BaseSQLApp;
 import com.atguigu.common.Constant;
 import com.atguigu.util.SQLUtil;
@@ -98,7 +97,7 @@ public class DwdTestScoreDetail extends BaseSQLApp {
 
 //        result.execute().print();
 
-                tEnv.executeSql(
+        tEnv.executeSql(
                 "create table dwd_test_score_detail(" +
                         " `id` string, " +
                         " `paper_id` string, " +
@@ -112,7 +111,7 @@ public class DwdTestScoreDetail extends BaseSQLApp {
                         " `course_id` string, " +
                         " `ts` bigint, " +
                         " pt TIMESTAMP_LTZ(3)" +
-                        ")"+ SQLUtil.getKafkaSinkDDL(Constant.TOPIC_DWD_TEST_SCORE_DETAIL)
+                        ")" + SQLUtil.getKafkaSinkDDL(Constant.TOPIC_DWD_TEST_SCORE_DETAIL)
         );
 
         result.executeInsert("dwd_test_score_detail");

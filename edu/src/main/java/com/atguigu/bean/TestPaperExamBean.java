@@ -12,13 +12,13 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CourseExamBean {
+public class TestPaperExamBean {
     // 窗口起始时间
     String stt;
     // 窗口结束时间
     String edt;
 
-    String courseId;
+    String paperId;
 
     //set<String> userId
     @NoSink

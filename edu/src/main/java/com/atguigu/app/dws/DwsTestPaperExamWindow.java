@@ -3,12 +3,13 @@ package com.atguigu.app.dws;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV1;
-import com.atguigu.bean.QuestionAnswerBean;
+import com.atguigu.bean.TestPaperExamBean;
 import com.atguigu.common.Constant;
 import com.atguigu.util.AtguiguUtil;
 import com.atguigu.util.DateFormatUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.*;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.configuration.Configuration;
@@ -16,7 +17,6 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -24,11 +24,12 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
 
-public class DwsQuestionAnswerWindow extends BaseAppV1 {
+public class DwsTestPaperExamWindow extends BaseAppV1 {
     public static void main(String[] args) {
-        new DwsQuestionAnswerWindow().init(3056, 2, "DwsQuestionAnswerWindow", Constant.TOPIC_DWD_TEST_PAPER_DETAIL);
+        new DwsTestPaperExamWindow().init(3508, 2, "DwsPaperExamWindow", Constant.TOPIC_DWD_TEST_SCORE_DETAIL);
     }
 
     @Override
@@ -36,100 +37,71 @@ public class DwsQuestionAnswerWindow extends BaseAppV1 {
 
         SingleOutputStreamOperator<JSONObject> distinctStream = distinctByTestScoreDetail(stream);
 
-        SingleOutputStreamOperator<QuestionAnswerBean> beanStream = parseToPOJO(distinctStream);
+        SingleOutputStreamOperator<TestPaperExamBean> beanStream = parseToPOJO(distinctStream);
 
-        SingleOutputStreamOperator<QuestionAnswerBean> aggregateStream = windowAndAggregate(beanStream);
+        SingleOutputStreamOperator<TestPaperExamBean> aggregateStream = windowAndAggregate(beanStream);
         aggregateStream.print();
+
+//        writeToClickhouse(aggregateStream);
 
     }
 
-
-    private SingleOutputStreamOperator<QuestionAnswerBean> windowAndAggregate(SingleOutputStreamOperator<QuestionAnswerBean> beanStream) {
-        return beanStream
-                .assignTimestampsAndWatermarks(WatermarkStrategy.<QuestionAnswerBean>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+    private SingleOutputStreamOperator<TestPaperExamBean> windowAndAggregate(SingleOutputStreamOperator<TestPaperExamBean> beanStream) {
+        return beanStream.
+                assignTimestampsAndWatermarks(WatermarkStrategy.<TestPaperExamBean>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                         .withTimestampAssigner((bean, ts) -> bean.getTs()))
-                .keyBy(QuestionAnswerBean::getQuestionId)
+                .keyBy(bean -> bean.getPaperId())
                 .window(TumblingEventTimeWindows.of(Time.hours(2)))
-                .reduce(new ReduceFunction<QuestionAnswerBean>() {
-
+                .reduce(new ReduceFunction<TestPaperExamBean>() {
                     @Override
-                    public QuestionAnswerBean reduce(QuestionAnswerBean value1, QuestionAnswerBean value2) throws Exception {
-                        value1.setCorrectCt(value1.getCorrectCt() + value2.getCorrectCt());
-                        value1.setAnswerCt(value1.getAnswerCt() + value2.getAnswerCt());
+                    public TestPaperExamBean reduce(TestPaperExamBean value1, TestPaperExamBean value2) throws Exception {
+                        value1.setDurationSec(value1.getDurationSec() + value2.getDurationSec());
+                        value1.setScore(value1.getScore() + value2.getScore());
+                        value1.getUserIdSet().addAll(value2.getUserIdSet());
                         return value1;
                     }
-                }, new WindowFunction<QuestionAnswerBean, QuestionAnswerBean, String, TimeWindow>() {
+                }, new WindowFunction<TestPaperExamBean, TestPaperExamBean, String, TimeWindow>() {
                     @Override
-                    public void apply(String s, TimeWindow window, Iterable<QuestionAnswerBean> input, Collector<QuestionAnswerBean> out) throws Exception {
-                        QuestionAnswerBean bean = input.iterator().next();
+                    public void apply(String s, TimeWindow window, Iterable<TestPaperExamBean> input, Collector<TestPaperExamBean> out) throws Exception {
+                        TestPaperExamBean bean = input.iterator().next();
 
                         bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
                         bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
 
-                        bean.setCorrectPercent((double) bean.getCorrectCt() / bean.getAnswerCt());
+                        bean.setExamNum(bean.getUserIdSet().size());
+
+                        bean.setAvgDuringTime((double) bean.getDurationSec() / bean.getExamNum());
+                        bean.setAvgScore(bean.getScore() / bean.getExamNum());
+
+                        bean.setTs(System.currentTimeMillis());
 
                         out.collect(bean);
                     }
                 });
 
+
     }
 
-    private SingleOutputStreamOperator<QuestionAnswerBean> parseToPOJO(SingleOutputStreamOperator<JSONObject> distinctStream) {
-//        return distinctStream.map(new RichMapFunction<JSONObject, QuestionAnswerBean>() {
-        return distinctStream.map(new MapFunction<JSONObject, QuestionAnswerBean>() {
-
-//            private ValueState<Integer> correctState;
-//            private ValueState<String> answerQuestionState;
-//
-//
-//            @Override
-//            public void open(Configuration parameters) throws Exception {
-//                answerQuestionState = getRuntimeContext().getState(new ValueStateDescriptor<String>("answerQuestionState", String.class));
-//                correctState = getRuntimeContext().getState(new ValueStateDescriptor<Integer>("correctState", Integer.class));
-//            }
-
-            @Override
-            public QuestionAnswerBean map(JSONObject value) throws Exception {
-                String userId = value.getString("user_id");
-                String questionId = value.getString("question_id");
-                String isCorrect = value.getString("is_correct");
-                int correctCt = 0;
-                int answerCvCt = 0;
-                int correctCvCt = 0;
-
-                if ("1".equals(isCorrect)) {
-                    correctCt = 1;
-                } else {
-                    correctCt = 0;
-                }
-
-
-//                if (answerQuestionState == null) {
-//
-//                    if ("1".equals(isCorrect)) {
-//                        correctCvCt = 1;
-//                    } else {
-//                        correctCvCt = 0;
-//                    }
-//                    answerQuestionState.update(questionId + ":" + userId);
-//                    correctState.update(correctCvCt);
-//
-//                } else {
-//
-//                    if (answerQuestionState.equals(questionId+ ":" + userId) && "1".equals(correctState.value())){
-//
-//                    }
-//                }
-
-                return new QuestionAnswerBean("", "", questionId, correctCt, 1, 0d, value.getLong("ts") * 1000);
-            }
-        });
+    private SingleOutputStreamOperator<TestPaperExamBean> parseToPOJO(SingleOutputStreamOperator<JSONObject> distinctStream) {
+        return distinctStream.map(new MapFunction<JSONObject, TestPaperExamBean>() {
+                    @Override
+                    public TestPaperExamBean map(JSONObject value) throws Exception {
+                        return TestPaperExamBean.builder()
+//                                .examId(value.getString("id"))
+                                .paperId(value.getString("paper_id"))
+                                .userIdSet(new HashSet<>(Collections.singleton(value.getString("user_id"))))
+                                .durationSec(value.getLong("duration_sec"))
+                                .score(value.getDouble("total_score"))
+                                .ts(value.getLong("ts") * 1000)
+                                .build();
+                    }
+                });
     }
 
     private SingleOutputStreamOperator<JSONObject> distinctByTestScoreDetail(DataStreamSource<String> stream) {
         return stream
                 .map(JSON::parseObject)
-                .keyBy(obj -> obj.getString("exam_id"))
+                .keyBy(obj -> obj.getString("id"))
                 .process(new KeyedProcessFunction<String, JSONObject, JSONObject>() {
 
                     private ValueState<JSONObject> maxDateDataState;
@@ -173,4 +145,6 @@ public class DwsQuestionAnswerWindow extends BaseAppV1 {
                     }
                 });
     }
+
+
 }

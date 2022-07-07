@@ -12,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PaperExamBean {
+public class TestPaperGradeBean {
     // 窗口起始时间
     String stt;
     // 窗口结束时间
@@ -20,27 +20,24 @@ public class PaperExamBean {
 
     String paperId;
 
-    //set<String> userId
-    @NoSink
+    //大于80分
     @Builder.Default
-    Set<String> userIdSet = new HashSet<>();
+    Integer greatGroup = 0;
 
-    Long durationSec;
-
-
-    Double score;
-
-    //考试人数
+    //70~80分
     @Builder.Default
-    Integer examNum = 0;
+    Integer goodGroup = 0;
 
-    //平均分
+    //60~70分
     @Builder.Default
-    Double avgScore = 0D;
+    Integer midGroup = 0;
 
-    //平均时长
+    //60分以下
     @Builder.Default
-    Double avgDuringTime = 0D;
+    Integer poorGroup = 0;
+
+    @Builder.Default
+    Integer ct = 0;
 
     // 时间戳
     Long ts;

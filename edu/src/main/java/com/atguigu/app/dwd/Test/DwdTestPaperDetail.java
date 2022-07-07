@@ -5,7 +5,6 @@ import com.atguigu.common.Constant;
 import com.atguigu.util.SQLUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 public class DwdTestPaperDetail extends BaseSQLApp {
@@ -39,7 +38,6 @@ public class DwdTestPaperDetail extends BaseSQLApp {
         );
 //        test_exam_question.execute().print();
         tEnv.createTemporaryView("test_exam_question", test_exam_question);
-
 
 
         Table test_paper = tEnv.sqlQuery(
