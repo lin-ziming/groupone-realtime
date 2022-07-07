@@ -61,10 +61,10 @@ public class DwsTradeCartAddUuWindow extends BaseAppV1 {
 											   Collector<CartAddUuBean> out) throws Exception {
 						Long ts = obj.getLong("ts");
 						String today = DateFormatUtil.toDate(ts);
-
+						System.out.println(today);
 						if (!today.equals(lastCartAddDateState.value())) {
 							CartAddUuBean bean = new CartAddUuBean("", "", 1L, ts);
-
+							out.collect(bean);
 							lastCartAddDateState.update(today);
 						}
 
@@ -81,8 +81,6 @@ public class DwsTradeCartAddUuWindow extends BaseAppV1 {
 							public CartAddUuBean reduce(CartAddUuBean value1,
 														CartAddUuBean value2) throws Exception {
 								value1.setCartAddUuCt(value1.getCartAddUuCt() + value2.getCartAddUuCt());
-								System.out.println("聚合后");
-								System.out.println(value1);
 								return value1;
 							}
 						},
@@ -92,17 +90,14 @@ public class DwsTradeCartAddUuWindow extends BaseAppV1 {
 											  Iterable<CartAddUuBean> values,
 											  Collector<CartAddUuBean> out) throws Exception {
 								CartAddUuBean bean = values.iterator().next();
-
 								bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
 								bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
 								bean.setTs(System.currentTimeMillis());
-								System.out.println("添加了时间信息后");
-								System.out.println(bean);
 								out.collect(bean);
 							}
 						}
 				)
-				.addSink(FlinkSinkUtil.getClickHoseSink("dws_trade_cart_add_uu_window",CartAddUuBean.class));
+				.addSink(FlinkSinkUtil.getClickHoseSink("dws_trade_cart_add_uu_window", CartAddUuBean.class));
 
 	}
 }
