@@ -1,0 +1,126 @@
+package com.atguigu.util;
+
+import com.atguigu.annotation.NotSink;
+import com.atguigu.bean.KeywordBean;
+import com.atguigu.common.Constant;
+import com.atguigu.sink.PhoenixSink;
+import com.atguigu.bean.NoSink;
+import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
+import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
+import org.apache.flink.connector.jdbc.JdbcSink;
+import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
+import org.apache.flink.shaded.guava18.com.google.common.base.CaseFormat;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ * @ClassName FlinkSinkUtil
+ * @Author Chris
+ * @Description TODO
+ * @Date 2022/7/4 16:46
+ **/
+
+public class FlinkSinkUtil {
+
+	public static SinkFunction<String> getKafkaSink(String topic) {
+		Properties props = new Properties();
+		props.put("bootstrap.servers", Constant.KAFKA_BROKERS);
+		props.put("transaction.timeout.ms", 15 * 60 * 1000);
+
+
+		return new FlinkKafkaProducer<String>(
+			"default",
+			new KafkaSerializationSchema<String>() {
+				@Override
+				public ProducerRecord<byte[], byte[]> serialize(String element,
+																@Nullable Long timestamp) {
+					return new ProducerRecord<>(topic, element.getBytes(StandardCharsets.UTF_8));
+				}
+			},
+			props,
+			FlinkKafkaProducer.Semantic.EXACTLY_ONCE
+		);
+	}
+
+	public static PhoenixSink getPhoenixSink() {
+		return new PhoenixSink();
+    }
+
+	public static <T> SinkFunction<T> getClickHoseSink(String table, Class<T> tClass) {
+		//使用jdbcSink封装一个clickhouse sink
+		String driver = Constant.CLICKHOUSE_DRIVER;
+		String url = Constant.CLICKHOUSE_URL;
+		// insert into table(age, name, sex) values(?,?,?)
+		// 使用反射, 找到pojo中的属性名
+
+		Field[] fields = tClass.getDeclaredFields();
+
+		String names = Stream
+			.of(fields)
+			.filter(field -> {
+				NotSink notSink = field.getAnnotation(NotSink.class);
+				// 没有注解的时候, 属性保留下来
+				return notSink == null;
+			})
+			.map(field -> {
+				String name = field.getName();
+				return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
+			})
+			.collect(Collectors.joining(","));
+
+		String sql = "insert into " + table + "(" + names + ")values(" + names.replaceAll("[^,]+", "?") + ")";
+		System.out.println("clickhosue 插入语句:" + sql);
+		return getJdbcSink(driver, url, null, null, sql);
+	}
+
+	private static <T> SinkFunction<T> getJdbcSink(String driver, String url, String user, String password,
+												   String sql) {
+		return JdbcSink.sink(
+			sql,
+			new JdbcStatementBuilder<T>() {
+				@Override
+				public void accept(PreparedStatement ps,
+								   T t) throws SQLException {
+					//TODO  要根据sql语句
+					// insert into a(stt,edt,keyword,keyword_count,ts)values(?,?,?,?,?)
+					Class<?> tClass = t.getClass();
+					Field[] fields = tClass.getDeclaredFields();
+					try {
+						for (int i = 0, position = 1; i < fields.length; i++) {
+							Field field = fields[i];
+							if (field.getAnnotation(NotSink.class) == null) {
+								field.setAccessible(true);
+								Object v = field.get(t);
+								ps.setObject(position++, v);
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			},
+			new JdbcExecutionOptions.Builder()
+				.withBatchSize(1024)
+				.withBatchIntervalMs(2000)
+				.withMaxRetries(3)
+				.build(),
+			new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+				.withDriverName(driver)
+				.withUrl(url)
+				.withUsername(user)
+				.withPassword(password)
+				.build()
+		);
+	}
+}
