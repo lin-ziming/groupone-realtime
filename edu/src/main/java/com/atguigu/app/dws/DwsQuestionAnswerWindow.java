@@ -103,6 +103,7 @@ public class DwsQuestionAnswerWindow extends BaseAppV1 {
                     correctCt = 0;
                 }
 
+
 //                if (answerQuestionState == null) {
 //
 //                    if ("1".equals(isCorrect)) {
