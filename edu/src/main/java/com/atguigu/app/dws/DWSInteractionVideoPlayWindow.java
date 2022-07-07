@@ -6,13 +6,14 @@ import com.atguigu.bean.InteractionVideoPlayBean;
 import com.atguigu.common.Constant;
 import com.atguigu.function.DimAsyncFunction;
 import com.atguigu.util.DateFormatUtil;
+import com.atguigu.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -30,24 +31,24 @@ import java.util.concurrent.TimeUnit;
 public class DWSInteractionVideoPlayWindow extends BaseAppV1 {
 
     public static void main(String[] args) {
-        new DWSInteractionVideoPlayWindow().init(11042, 2, "DWDInteractionVideoPlay", Constant.TOPIC_DWD_TRAFFIC_APPVIDEO);
+        new DWSInteractionVideoPlayWindow().init(11068, 2, "DWDInteractionVideoPlay", Constant.TOPIC_DWD_TRAFFIC_APPVIDEO);
     }
 
     @Override
     public void handle(StreamExecutionEnvironment env, DataStreamSource<String> stream) {
+
         //distinct uid per day and parse pojo
         SingleOutputStreamOperator<InteractionVideoPlayBean> beanStream = distinctUIDAndParsePojo(stream);
-//        beanStream.print();
 
         //要先dim join chapter_info 获取维度后才聚合, keyby chapter_id
+        //read dim data from phoenix and redis by asyncIo
         SingleOutputStreamOperator<InteractionVideoPlayBean> withDimStream = joinDimVideoInfo(beanStream);
-        withDimStream.print();
 
-
-//        SingleOutputStreamOperator<InteractionVideoPlayBean> aggStream = WindowAllAndAggregate(withDimStream);
+        //aggregate metrics and set stt,edt,ts
+        SingleOutputStreamOperator<InteractionVideoPlayBean> aggStream = WindowAllAndAggregate(withDimStream);
 //        aggStream.print();
 
-
+        aggStream.addSink(FlinkSinkUtil.getClickHoseSink("dws_interaction_chapter_video_play_window", InteractionVideoPlayBean.class));
     }
 
     private SingleOutputStreamOperator<InteractionVideoPlayBean> joinDimVideoInfo(SingleOutputStreamOperator<InteractionVideoPlayBean> beanStream) {
@@ -117,48 +118,23 @@ public class DWSInteractionVideoPlayWindow extends BaseAppV1 {
                         bean.setTs(context.currentProcessingTime());
                         bean.setViewerCount((long) bean.getVideoId().length());
                         bean.setAvgSecPerViewer(bean.getPlaySecSum() / bean.getViewerCount());
+
+                        out.collect(bean);
                     }
                 }
             );
     }
 
-//            .windowAll(TumblingEventTimeWindows.of(Time.seconds(5)))
-//            .reduce(new ReduceFunction<InteractionVideoPlayBean>() {
-//                        @Override
-//                        public InteractionVideoPlayBean reduce(InteractionVideoPlayBean value1, InteractionVideoPlayBean value2) throws Exception {
-//
-////                            value1.setViewerCount(value1.getViewerCount() + value2.getViewerCount());
-//                            value1.getUserId().addAll(value2.getUserId());
-//                            value1.setPlayCount(value1.getPlayCount() + value2.getPlayCount());
-//                            value1.setPlaySecSum(value1.getPlaySecSum() + value2.getPlaySecSum());
-//                            return value1;
-//                        }
-//                    },
-//                new AllWindowFunction<InteractionVideoPlayBean, InteractionVideoPlayBean, TimeWindow>() {
-//                    @Override
-//                    public void apply(TimeWindow window, Iterable<InteractionVideoPlayBean> values, Collector<InteractionVideoPlayBean> out) throws Exception {
-//                        InteractionVideoPlayBean bean = values.iterator().next();
-//
-//                        bean.setStt(DateFormatUtil.toYmdHms(window.getStart()));
-//                        bean.setEdt(DateFormatUtil.toYmdHms(window.getEnd()));
-//                        bean.setTs(System.currentTimeMillis());
-//                        bean.setViewerCount((long) bean.getUserId().size());
-//                        bean.setAvgSecPerViewer(Double.valueOf((new DecimalFormat("0.0000").format(bean.getPlaySecSum() / bean.getViewerCount()))));
-//
-//                        out.collect(bean);
-//                    }
-//                }
-//            );
 
 
     private SingleOutputStreamOperator<InteractionVideoPlayBean> distinctUIDAndParsePojo(DataStreamSource<String> stream) {
 
         return stream.map(JSONObject::parseObject)
             .keyBy(json -> json.getJSONObject("common").getString("uid"))
-            .process(new KeyedProcessFunction<String, JSONObject, InteractionVideoPlayBean>() {
-
+            //why not use process?
+            .map(new MapFunction<JSONObject, InteractionVideoPlayBean>() {
                 @Override
-                public void processElement(JSONObject value, Context ctx, Collector<InteractionVideoPlayBean> out) throws Exception {
+                public InteractionVideoPlayBean map(JSONObject value) throws Exception {
                     JSONObject appVideo = value.getJSONObject("appVideo");
 
                     //直接统计
@@ -176,9 +152,7 @@ public class DWSInteractionVideoPlayWindow extends BaseAppV1 {
 
                     bean.getUserId().add(value.getJSONObject("common").getString("uid"));
 
-                    out.collect(bean);
-
-
+                    return bean;
                 }
             });
     }

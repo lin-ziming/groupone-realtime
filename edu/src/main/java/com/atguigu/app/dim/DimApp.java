@@ -40,7 +40,7 @@ import java.util.Set;
 public class DimApp extends BaseAppV1 {
 
     public static void main(String[] args) {
-        new DimApp().init(11041, 2, "DimApp", Constant.TOPIC_ODS_DB);
+        new DimApp().init(11081, 2, "DimApp", Constant.TOPIC_ODS_DB);
     }
 
     @Override
