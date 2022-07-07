@@ -16,7 +16,7 @@ public class SQLUtil {
                 " 'properties.bootstrap.servers'='" + Constant.KAFKA_BROKERS + "',\n" +
                 " 'properties.group.id'='" + groupId + "', \n" +
                 /*" 'properties.auto.offset.reset' = 'earliest', " +*/ // 消费者组第一次消费从头开始,后续消费从上次提交的offsets开始
-                " 'scan.startup.mode' = 'earliest-offset', " + // 永远从头开始消费
+//                " 'scan.startup.mode' = 'earliest-offset', " + // 永远从头开始消费
                 " 'format'='json', \n" +
                 " 'topic'='" + topic + "'\n" +
 
