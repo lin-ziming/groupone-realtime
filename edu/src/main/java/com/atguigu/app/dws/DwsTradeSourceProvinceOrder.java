@@ -50,6 +50,7 @@ public class DwsTradeSourceProvinceOrder extends BaseAppV3 {
         );
     }
 
+
     @Override
     public void handle(StreamExecutionEnvironment env, Map<String, DataStreamSource<String>> streams) {
         streams
