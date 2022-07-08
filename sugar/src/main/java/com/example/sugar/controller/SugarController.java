@@ -23,7 +23,6 @@ public class SugarController {
     @RequestMapping("/sugar/gmv")
     public String gmv(int date) {
         System.out.println(date);
-
         return "ok";
     }
 
