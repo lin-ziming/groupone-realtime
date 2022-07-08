@@ -12,6 +12,7 @@ public interface TradeService {
 
     
     List<TrafficVisitorTypeStats> statsTrafficVisitorTypeStats(int date);
+    List<TrafficVisitorTypeStats> getVisitorTypeStats(Integer date);
     List<Kw> statsKw(int date);
 
     List<TradeSourceOrderStats> getOrderInfoBySource(int date);

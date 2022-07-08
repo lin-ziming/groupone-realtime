@@ -22,6 +22,11 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
+    public List<TrafficVisitorTypeStats> getVisitorTypeStats(Integer date) {
+        return tradeMapper.statsTrafficVisitorTypeStats(date);
+    }
+
+    @Override
     public List<Kw> statsKw(int date) {
         return tradeMapper.statsKw(date);
     }
