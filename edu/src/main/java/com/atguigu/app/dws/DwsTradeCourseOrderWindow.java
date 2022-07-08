@@ -31,7 +31,7 @@ public class DwsTradeCourseOrderWindow extends BaseAppV1 {
             3009,
             2,
             "DwsTradeCourseOrderWindow",
-            Constant.TOPIC_DWD_ORDER_DETAIL
+            Constant.TOPIC_DWD_TRADE_ORDER_DETAIL
         );
     }
     
