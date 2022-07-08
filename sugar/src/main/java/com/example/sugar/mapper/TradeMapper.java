@@ -1,68 +1,23 @@
 package com.example.sugar.mapper;
 
 import com.example.sugar.bean.Kw;
-import com.example.sugar.bean.PageViewType;
 import com.example.sugar.bean.TradeProvinceOrderStats;
 import com.example.sugar.bean.TradeSourceOrderStats;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
-import com.example.sugar.bean.UserChangeCtPerType;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 public interface TradeMapper {
 
-	@Select("SELECT \n" +
-			"    keyword,\n" +
-			"    sum(keyword_count)\n" +
-			"FROM dws_traffic_source_keyword_page_view_window\n" +
-			"WHERE toYYYYMMDD(stt) = #{date}\n" +
-			"GROUP BY keyword")
-	List<Kw> statsKw(int date);
+    @Select("SELECT \n" +
+        "    keyword,\n" +
+        "    sum(keyword_count)\n" +
+        "FROM dws_traffic_source_keyword_page_view_window\n" +
+        "WHERE toYYYYMMDD(stt) = #{date}\n" +
+        "GROUP BY keyword")
+    List<Kw> statsKw(int date);
 
-	@Select("SELECT \n" +
-			"    is_new,\n" +
-			"    sum(uv_ct) AS uv_ct,\n" +
-			"    sum(pv_ct) AS pv_ct,\n" +
-			"    sum(sv_ct) AS sv_ct,\n" +
-			"    sum(uj_ct) AS uj_ct,\n" +
-			"    sum(dur_sum) AS dur_sum\n" +
-			"FROM dws_traffic_rc_vc_ch_ar_is_new_page_view_window\n" +
-			"WHERE toYYYYMMDD(stt) = #{date}\n" +
-			"GROUP BY is_new")
-	List<TrafficVisitorTypeStats> statsTrafficVisitorTypeStats(int date);
-
-	@Select("SELECT \n" +
-			"    'backCt' AS type,\n" +
-			"    sum(back_ct) AS back_ct\n" +
-			"FROM dws_user_user_active_and_back_window\n" +
-			"WHERE toYYYYMMDD(stt) = #{date}\n" +
-			"union all\n" +
-			"SELECT \n" +
-			"    'activeCt' AS type,\n" +
-			"    sum(active_ct) AS active_ct\n" +
-			"FROM dws_user_user_active_and_back_window\n" +
-			"WHERE toYYYYMMDD(stt) = #{date}\n" +
-			"union all\n" +
-			"SELECT \n" +
-			"    'newCt' AS type,\n" +
-			"    sum(register_ct) AS register_ct\n" +
-			"FROM dws_user_register_window\n" +
-			"WHERE toYYYYMMDD(stt) = #{date}")
-	List<UserChangeCtPerType> selectUserChangeCtPerType(int date);
-
-	@Select("SELECT \n" +
-			"    'home' AS page_id,\n" +
-			"    sum(home_uv_ct) AS home_uv_ct\n" +
-			"FROM dws_traffic_page_view_window\n" +
-			"WHERE toYYYYMMDD(stt) = #{date}\n" +
-			"union all\n" +
-			"SELECT \n" +
-            "    'course_detail' AS page_id,\n" +
-            "    sum(course_detail_uv_ct) AS course_detail_uv_ct\n" +
-            "FROM dws_traffic_page_view_window\n" +
-            "WHERE toYYYYMMDD(stt) = #{date}\n")
-	List<PageViewType> selectPageIdViewCtType(int date);
     @Select("SELECT \n" +
         "    is_new,\n" +
         "    sum(uv_ct) AS uv_ct,\n" +
