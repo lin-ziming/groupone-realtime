@@ -1,6 +1,7 @@
 package com.example.sugar.service;
 
 import com.example.sugar.bean.Kw;
+import com.example.sugar.bean.TradeProvinceOrderStats;
 import com.example.sugar.bean.TradeSourceOrderStats;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
 
@@ -14,4 +15,5 @@ public interface TradeService {
     List<Kw> statsKw(int date);
 
     List<TradeSourceOrderStats> getOrderInfoBySource(int date);
+    List<TradeProvinceOrderStats> getOrderInfoByProvince(int date);
 }

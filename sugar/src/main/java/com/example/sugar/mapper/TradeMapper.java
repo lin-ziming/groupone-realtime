@@ -1,6 +1,7 @@
 package com.example.sugar.mapper;
 
 import com.example.sugar.bean.Kw;
+import com.example.sugar.bean.TradeProvinceOrderStats;
 import com.example.sugar.bean.TradeSourceOrderStats;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
 import org.apache.ibatis.annotations.Select;
@@ -52,4 +53,13 @@ public interface TradeMapper {
             ") su\n" +
             "on so.source=su.source")
     List<TradeSourceOrderStats> getOrderInfoBySource(int date);
+
+    @Select("select province,\n" +
+            "\tsum(amount) amount,\n" +
+            "\tsum(count) userCount,\n" +
+            "\tsum(times) orderCount\n" +
+            "from dws_trade_source_province_order_window\n" +
+            "where toYYYYMMDD(stt)=#{date}\n" +
+            "group by province")
+    List<TradeProvinceOrderStats> getOrderInfoByProvince(int date);
 }

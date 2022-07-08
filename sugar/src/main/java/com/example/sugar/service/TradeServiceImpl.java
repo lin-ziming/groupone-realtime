@@ -1,6 +1,7 @@
 package com.example.sugar.service;
 
 import com.example.sugar.bean.Kw;
+import com.example.sugar.bean.TradeProvinceOrderStats;
 import com.example.sugar.bean.TradeSourceOrderStats;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
 import com.example.sugar.mapper.TradeMapper;
@@ -28,6 +29,11 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public List<TradeSourceOrderStats> getOrderInfoBySource(int date) {
         return tradeMapper.getOrderInfoBySource(date);
+    }
+
+    @Override
+    public List<TradeProvinceOrderStats> getOrderInfoByProvince(int date) {
+        return tradeMapper.getOrderInfoByProvince(date);
     }
 
 
