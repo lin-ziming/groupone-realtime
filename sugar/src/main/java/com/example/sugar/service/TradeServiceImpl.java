@@ -1,6 +1,5 @@
 package com.example.sugar.service;
 
-import com.example.sugar.bean.InteractionPlayTime;
 import com.example.sugar.bean.Kw;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
 import com.example.sugar.mapper.TradeMapper;
@@ -25,10 +24,7 @@ public class TradeServiceImpl implements TradeService {
         return tradeMapper.statsKw(date);
     }
 
-    @Override
-    public List<InteractionPlayTime> statsInteractionPlayTime(int date) {
-        return tradeMapper.statsInteractionPlayTime(date);
-    }
+
 
 
 }
