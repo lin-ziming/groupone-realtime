@@ -1,5 +1,8 @@
 package com.atguigu.bean;
 
+import com.atguigu.annotation.NotSink;
+
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -7,22 +10,24 @@ import java.util.Set;
  * @Description: todo
  * @Create_time: 2022/7/6 18:27
  */
-public class TrafficUniqueVisitor {
+public class TrafficSourceUV implements Serializable {
     private String stt;
     private String edt;
+    private String source;
     private Long count;
 
     private Long ts;
 
-    @NoSink
+    @NotSink
     private Set<String> userIdSet;
 
-    public TrafficUniqueVisitor() {
+    public TrafficSourceUV() {
     }
 
-    public TrafficUniqueVisitor(String stt, String edt, Long count, Long ts, Set<String> userIdSet) {
+    public TrafficSourceUV(String stt, String edt, String source, Long count, Long ts, Set<String> userIdSet) {
         this.stt = stt;
         this.edt = edt;
+        this.source = source;
         this.count = count;
         this.ts = ts;
         this.userIdSet = userIdSet;
@@ -42,6 +47,14 @@ public class TrafficUniqueVisitor {
 
     public void setEdt(String edt) {
         this.edt = edt;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public Long getCount() {
@@ -70,9 +83,10 @@ public class TrafficUniqueVisitor {
 
     @Override
     public String toString() {
-        return "TrafficUniqueVisitor{" +
+        return "TrafficSourceUV{" +
                 "stt='" + stt + '\'' +
                 ", edt='" + edt + '\'' +
+                ", source='" + source + '\'' +
                 ", count=" + count +
                 ", ts=" + ts +
                 ", userIdSet=" + userIdSet +
