@@ -2,6 +2,7 @@ package com.atguigu.bean;
 
 import com.atguigu.annotation.NotSink;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Set;
  * @Description: todo
  * @Create_time: 2022/7/6 18:27
  */
-public class TrafficSourceUV {
+public class TrafficSourceUV implements Serializable {
     private String stt;
     private String edt;
     private String source;
