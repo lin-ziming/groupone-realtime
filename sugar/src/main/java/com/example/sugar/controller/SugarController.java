@@ -24,6 +24,7 @@ public class SugarController {
     public String gmv(int date) {
         System.out.println(date);
 
+
         return "ok";
     }
 
