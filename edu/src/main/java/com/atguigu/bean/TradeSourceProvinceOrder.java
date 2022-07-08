@@ -1,5 +1,7 @@
 package com.atguigu.bean;
 
+import com.atguigu.annotation.NotSink;
+
 import java.util.Set;
 
 /**
@@ -24,9 +26,9 @@ public class TradeSourceProvinceOrder {
 
     private Long ts;
 
-    @NoSink
+    @NotSink
     private Set<String> orderIdSet;
-    @NoSink
+    @NotSink
     private Set<String> userIdSet;
 
     public TradeSourceProvinceOrder() {
