@@ -1,0 +1,7 @@
+
+# Created by .ignore support plugin (hsz.mobi)
+.idea
+sugar.iml
+*/target
+/target
+dependency-reduced-pom.xml
