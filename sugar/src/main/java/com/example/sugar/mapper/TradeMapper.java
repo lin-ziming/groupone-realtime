@@ -1,9 +1,6 @@
 package com.example.sugar.mapper;
 
-import com.example.sugar.bean.Kw;
-import com.example.sugar.bean.TradeProvinceOrderStats;
-import com.example.sugar.bean.TradeSourceOrderStats;
-import com.example.sugar.bean.TrafficVisitorTypeStats;
+import com.example.sugar.bean.*;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -78,4 +75,38 @@ public interface TradeMapper {
             "from dws_trade_source_province_order_window\n" +
             "where toYYYYMMDD(stt)=#{date}")
     Long getOrderCount(int date);
+
+
+    //cxy
+    @Select("SELECT \n" +
+            "    'backCt' AS type,\n" +
+            "    sum(back_ct) AS back_ct\n" +
+            "FROM dws_user_user_active_and_back_window\n" +
+            "WHERE toYYYYMMDD(stt) = #{date}\n" +
+            "union all\n" +
+            "SELECT \n" +
+            "    'activeCt' AS type,\n" +
+            "    sum(active_ct) AS active_ct\n" +
+            "FROM dws_user_user_active_and_back_window\n" +
+            "WHERE toYYYYMMDD(stt) = #{date}\n" +
+            "union all\n" +
+            "SELECT \n" +
+            "    'newCt' AS type,\n" +
+            "    sum(register_ct) AS register_ct\n" +
+            "FROM dws_user_register_window\n" +
+            "WHERE toYYYYMMDD(stt) = #{date}")
+    List<UserChangeCtPerType> selectUserChangeCtPerType(int date);
+
+    @Select("SELECT \n" +
+            "    'home' AS page_id,\n" +
+            "    sum(home_uv_ct) AS home_uv_ct\n" +
+            "FROM dws_traffic_page_view_window\n" +
+            "WHERE toYYYYMMDD(stt) = #{date}\n" +
+            "union all\n" +
+            "SELECT \n" +
+            "    'course_detail' AS page_id,\n" +
+            "    sum(course_detail_uv_ct) AS course_detail_uv_ct\n" +
+            "FROM dws_traffic_page_view_window\n" +
+            "WHERE toYYYYMMDD(stt) = #{date}\n")
+    List<PageViewType> selectPageIdViewCtType(int date);
 }

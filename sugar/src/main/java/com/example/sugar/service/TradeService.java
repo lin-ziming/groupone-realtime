@@ -1,10 +1,7 @@
 package com.example.sugar.service;
 
 
-import com.example.sugar.bean.Kw;
-import com.example.sugar.bean.TradeProvinceOrderStats;
-import com.example.sugar.bean.TradeSourceOrderStats;
-import com.example.sugar.bean.TrafficVisitorTypeStats;
+import com.example.sugar.bean.*;
 
 import java.util.List;
 
@@ -21,4 +18,7 @@ public interface TradeService {
     Double getTotalAmount(int date);
     Long getUserCount(int date);
     Long getOrderCount(int date);
+    //cxy
+    List<UserChangeCtPerType> selectUserChangeCtPerType(int date);
+    List<PageViewType> selectPageIdViewCtType(int date);
 }
