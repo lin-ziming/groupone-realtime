@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface TradeMapper {
 
+
     @Select("SELECT \n" +
         "    keyword,\n" +
         "    sum(keyword_count)\n" +
