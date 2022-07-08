@@ -16,4 +16,7 @@ public interface TradeService {
 
     List<TradeSourceOrderStats> getOrderInfoBySource(int date);
     List<TradeProvinceOrderStats> getOrderInfoByProvince(int date);
+    Double getTotalAmount(int date);
+    Long getUserCount(int date);
+    Long getOrderCount(int date);
 }

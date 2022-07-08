@@ -36,5 +36,20 @@ public class TradeServiceImpl implements TradeService {
         return tradeMapper.getOrderInfoByProvince(date);
     }
 
+    @Override
+    public Double getTotalAmount(int date) {
+        return tradeMapper.getTotalAmount(date);
+    }
+
+    @Override
+    public Long getUserCount(int date) {
+        return tradeMapper.getUserCount(date);
+    }
+
+    @Override
+    public Long getOrderCount(int date) {
+        return tradeMapper.getOrderCount(date);
+    }
+
 
 }

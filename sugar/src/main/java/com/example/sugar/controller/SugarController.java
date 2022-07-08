@@ -164,4 +164,40 @@ public class SugarController {
         result.put("data",data);
         return result.toJSONString();
     }
+
+    // 数字翻牌器
+    @RequestMapping("/sugar/trade/totalamount")
+    public String totalAmount(int date) {
+        System.out.println(date);
+        Double totalAmount = tradeService.getTotalAmount(date);
+        JSONObject result = new JSONObject();
+        result.put("status", 0);
+        result.put("msg", "");
+        result.put("data", totalAmount);
+        return result.toJSONString();
+    }
+
+    // 数字翻牌器
+    @RequestMapping("/sugar/trade/usercount")
+    public String userCount(int date) {
+        System.out.println(date);
+        Long userCount = tradeService.getUserCount(date);
+        JSONObject result = new JSONObject();
+        result.put("status", 0);
+        result.put("msg", "");
+        result.put("data", userCount);
+        return result.toJSONString();
+    }
+
+    // 数字翻牌器
+    @RequestMapping("/sugar/trade/ordercount")
+    public String orderCount(int date) {
+        System.out.println(date);
+        Long orderCount = tradeService.getOrderCount(date);
+        JSONObject result = new JSONObject();
+        result.put("status", 0);
+        result.put("msg", "");
+        result.put("data", orderCount);
+        return result.toJSONString();
+    }
 }

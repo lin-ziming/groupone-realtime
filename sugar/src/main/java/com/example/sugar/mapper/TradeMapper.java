@@ -62,4 +62,19 @@ public interface TradeMapper {
             "where toYYYYMMDD(stt)=#{date}\n" +
             "group by province")
     List<TradeProvinceOrderStats> getOrderInfoByProvince(int date);
+
+    @Select("select sum(amount) " +
+            "from dws_trade_source_province_order_window\n" +
+            "where toYYYYMMDD(stt)=#{date}")
+    Double getTotalAmount(int date);
+
+    @Select("select sum(count) " +
+            "from dws_trade_source_province_order_window\n" +
+            "where toYYYYMMDD(stt)=#{date}")
+    Long getUserCount(int date);
+
+    @Select("select sum(times) " +
+            "from dws_trade_source_province_order_window\n" +
+            "where toYYYYMMDD(stt)=#{date}")
+    Long getOrderCount(int date);
 }
