@@ -1,6 +1,7 @@
 package com.example.sugar.service;
 
 import com.example.sugar.bean.Kw;
+import com.example.sugar.bean.TradeSourceOrderStats;
 import com.example.sugar.bean.TrafficVisitorTypeStats;
 
 import java.util.List;
@@ -11,4 +12,6 @@ public interface TradeService {
     
     List<TrafficVisitorTypeStats> statsTrafficVisitorTypeStats(int date);
     List<Kw> statsKw(int date);
+
+    List<TradeSourceOrderStats> getOrderInfoBySource(int date);
 }
