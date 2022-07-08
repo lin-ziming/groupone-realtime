@@ -4,22 +4,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.app.BaseAppV3;
 import com.atguigu.bean.TradeSourceProvinceOrder;
-import com.atguigu.bean.TrafficUniqueVisitor;
 import com.atguigu.common.Constant;
 import com.atguigu.util.DateFormatUtil;
 import com.atguigu.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.CoGroupFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
@@ -41,7 +36,7 @@ public class DwsTradeSourceProvinceOrder extends BaseAppV3 {
 
     public static void main(String[] args) {
         Map<String, Long[]> map = new HashMap<>();
-        map.put(Constant.TOPIC_DWD_ORDER_DETAIL, new Long[]{});
+        map.put(Constant.TOPIC_DWD_TRADE_ORDER_DETAIL, new Long[]{});
         new DwsTradeSourceProvinceOrder().init(
                 12000,
                 2,
@@ -53,7 +48,7 @@ public class DwsTradeSourceProvinceOrder extends BaseAppV3 {
     @Override
     public void handle(StreamExecutionEnvironment env, Map<String, DataStreamSource<String>> streams) {
         streams
-                .get(Constant.TOPIC_DWD_ORDER_DETAIL)
+                .get(Constant.TOPIC_DWD_TRADE_ORDER_DETAIL)
                 .map(new MapFunction<String, TradeSourceProvinceOrder>() {
                     @Override
                     public TradeSourceProvinceOrder map(String json) throws Exception {
@@ -86,7 +81,8 @@ public class DwsTradeSourceProvinceOrder extends BaseAppV3 {
                                 v1.getUserIdSet().addAll(v2.getUserIdSet());
                                 return v1;
                             }
-                        }, new ProcessWindowFunction<TradeSourceProvinceOrder, TradeSourceProvinceOrder, String, TimeWindow>() {
+                        },
+                        new ProcessWindowFunction<TradeSourceProvinceOrder, TradeSourceProvinceOrder, String, TimeWindow>() {
                             @Override
                             public void process(String s, Context context, Iterable<TradeSourceProvinceOrder> elements, Collector<TradeSourceProvinceOrder> out) throws Exception {
                                 TradeSourceProvinceOrder value = elements.iterator().next();
