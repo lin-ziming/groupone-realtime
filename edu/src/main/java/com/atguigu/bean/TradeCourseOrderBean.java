@@ -1,6 +1,6 @@
 package com.atguigu.bean;
 
-import com.atguigu.bean.NoSink;
+import com.atguigu.annotation.NotSink;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +35,7 @@ public class TradeCourseOrderBean {
     String categoryName;
 
     // 订单 ID
-    @NoSink
+    @NotSink
     @Builder.Default
     Set<String> orderIdSet = new HashSet<>();
     //用户ID

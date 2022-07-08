@@ -11,4 +11,6 @@ public interface TradeService {
     
     List<TrafficVisitorTypeStats> statsTrafficVisitorTypeStats(int date);
     List<Kw> statsKw(int date);
+
+
 }
