@@ -99,7 +99,6 @@ public class DwsTestQuestionAnswerWindow extends BaseAppV1 {
 
                     @Override
                     public TestQuestionAnswerBean map(JSONObject value) throws Exception {
-                        String examId = value.getString("exam_id");
                         String questionId = value.getString("question_id");
                         String isCorrect = value.getString("is_correct");
 
@@ -119,11 +118,14 @@ public class DwsTestQuestionAnswerWindow extends BaseAppV1 {
                             answerUvCt = 1;
                             correctCvCt = correctCt;
                             answerQuestionState.update(questionId + ":" +  value.getString("user_id"));
+                            correctState.update(1);
 
                         } else {
                             answerUvCt = 0;
-                            if (correctCvCt == 0 && "1".equals(isCorrect)) {
+                            if (correctState.value() == 0 && "1".equals(isCorrect)) {
                                 correctCvCt = 1;
+                            }else{
+                                correctCvCt = 0;
                             }
                         }
 
