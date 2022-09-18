@@ -1,5 +1,7 @@
 package com.atguigu.common;
 
+import com.atguigu.bean.TestPaperExamBean;
+
 public class Constant {
 	public static final String KAFKA_BROKERS = "hadoop302:9092,hadoop303:9092,hadoop304:9092";
 	public static final String PHOENIX_DRIVER = "org.apache.phoenix.jdbc.PhoenixDriver";
@@ -27,4 +29,7 @@ public class Constant {
 	public static final String TOPIC_DWD_INTERACTION_REVIEW = "dwd_interaction_review";
 	public static final String DWS_TRAFFIC_SOURCE_UV_WINDOW = "dws_traffic_source_uv_window";
 	public static final String DWS_TRADE_SOURCE_PROVINCE_ORDER_WINDOW = "dws_trade_source_province_order_window";
+
+	public static final String TOPIC_DWD_TEST_SCORE_DETAIL = "dwd_test_score_detail";
+	public static final String TOPIC_DWD_TEST_PAPER_DETAIL = "dwd_test_paper_detail";
 }

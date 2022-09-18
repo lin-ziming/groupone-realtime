@@ -16,13 +16,13 @@ public abstract class BaseSQLApp {
      * @param port             端口号
      * @param p                并行度
      * @param ckGroupIdJobName ck路径 消费者 jobName
-     * @param ttlSecond 事实表的超时时间
+     * @param ttlSecond        事实表的超时时间
      */
     public void init(int port, int p, String ckGroupIdJobName, long ttlSecond) {
         System.setProperty("HADOOP_USER_NAME", "atguigu");
         Configuration conf = new Configuration();
         conf.setInteger("rest.port", port);
-        conf.setString("flink.hadoop.dfs.client.use.datanode.hostname","true"); //
+        conf.setString("flink.hadoop.dfs.client.use.datanode.hostname", "true"); //
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(p);
@@ -40,7 +40,7 @@ public abstract class BaseSQLApp {
 
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         // 给sql应用设置job name
-        tEnv.getConfig().getConfiguration().setString("pipeline.name",ckGroupIdJobName);
+        tEnv.getConfig().getConfiguration().setString("pipeline.name", ckGroupIdJobName);
         // 在join的时候, 对join双方的表均有效
         // 对lookup join的维表无效
         tEnv.getConfig().setIdleStateRetention(Duration.ofSeconds(ttlSecond));
@@ -51,7 +51,7 @@ public abstract class BaseSQLApp {
     protected abstract void handle(StreamExecutionEnvironment env,
                                    StreamTableEnvironment tEnv);
 
-    public void readOdsDb(StreamTableEnvironment tEnv, String groupId){
+    public void readOdsDb(StreamTableEnvironment tEnv, String groupId) {
         tEnv.executeSql("create table ods_db(\n" +
                 " `database` string, \n" +
                 " `table` string, \n" +
@@ -60,10 +60,10 @@ public abstract class BaseSQLApp {
                 " `data` map<string, string>, \n" +
                 " `old` map<string, string>, \n" +
                 " pt as proctime() \n" +
-                ")" + SQLUtil.getKafkaSourceDDL(Constant.TOPIC_ODS_DB,groupId));
+                ")" + SQLUtil.getKafkaSourceDDL(Constant.TOPIC_ODS_DB, groupId));
     }
 
-    public void readBaseDic(StreamTableEnvironment tEnv){
+    public void readBaseDic(StreamTableEnvironment tEnv) {
         tEnv.executeSql("create table base_dic(\n" +
                 " dic_code string, \n" +
                 " dic_name string \n" +
@@ -77,5 +77,6 @@ public abstract class BaseSQLApp {
                 " 'lookup.cache.ttl' = '30 s' \n" +
                 ")");
     }
+
 
 }

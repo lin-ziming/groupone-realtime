@@ -23,6 +23,7 @@ public class AtguiguUtil {
 	}
 
 
+
 	public static boolean compareLTZ(String one, String two) {
 		String oneNoZ = one.replace("Z", "");
 		String twoNoZ = two.replace("Z", "");
