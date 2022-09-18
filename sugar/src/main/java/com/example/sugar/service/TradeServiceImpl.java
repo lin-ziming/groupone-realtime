@@ -53,6 +53,7 @@ public class TradeServiceImpl implements TradeService {
         return tradeMapper.getOrderCount(date);
     }
 
+
     //cxy
     @Override
     public List<UserChangeCtPerType> selectUserChangeCtPerType(int date) {
