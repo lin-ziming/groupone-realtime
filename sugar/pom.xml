@@ -8,7 +8,8 @@
         <version>2.7.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.atguigu.realtime</groupId>
+
+    <groupId>com.example</groupId>
     <artifactId>sugar</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>sugar</name>
@@ -69,7 +70,6 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.68</version>
         </dependency>
-
 
     </dependencies>
 

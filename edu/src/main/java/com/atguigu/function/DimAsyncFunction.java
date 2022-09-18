@@ -3,10 +3,7 @@ package com.atguigu.function;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSONObject;
-import com.atguigu.util.DimUtil;
-import com.atguigu.util.DruidPoolUtil;
-import com.atguigu.util.JedisPoolUtil;
-import com.atguigu.util.ThreadPoolUtil;
+import com.atguigu.util.*;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
@@ -14,6 +11,7 @@ import redis.clients.jedis.Jedis;
 
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.concurrent.Executor;
 
 /**
  * @author shogunate
@@ -22,6 +20,8 @@ import java.util.Collections;
  */
 public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> {
 
+    private DruidDataSource druidDataSource;
+
     public abstract String getTable();
 
     public abstract String getId(T input);
@@ -29,33 +29,49 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> {
     public abstract void addDim(T input, JSONObject dim);
 
 
-    private ThreadPoolUtil threadPool;
+    private Executor executor;
+
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        threadPool = ThreadPoolUtil.getThreadPoolInstance();
+        executor = ThreadPoolUtil.getThreadPoolInstance().getThreadPool();
+
+        druidDataSource = DruidPoolUtil.getDruidPoolInstance().getDruidDataSource();
+
     }
 
 
     @Override
     public void asyncInvoke(T input, ResultFuture<T> resultFuture) throws Exception {
-        threadPool.executor(new Runnable() {
+        executor.execute(new Runnable() {
 
             @Override
             public void run() {
                 //phoConn and redis conn
-                DruidDataSource druidDataSource = DruidPoolUtil.getDruidPoolInstance().getDruidDataSource();
-                DruidPooledConnection phoenixConn;
+                DruidPooledConnection phoenixConn = null;
+
+//                Jedis jedisPoolClient = RedisUtil.getRedisClient();
+                Jedis jedisPoolClient = JedisPoolUtil.getJedisPoolInstance().getJedisPoolClient();
+
+//                try {
+//                    jedisPoolClient = RedisUtil.getRedisClient();
+//                } catch (Exception e) {
+//                    System.out.println("Redis time out");
+//                    e.printStackTrace();
+//                }
+
                 try {
                     phoenixConn = druidDataSource.getConnection();
                 } catch (SQLException e) {
                     throw new RuntimeException("Can't access Phoenix");
                 }
-                Jedis jedisPoolClient = JedisPoolUtil.getJedisPoolInstance().getJedisPoolClient();
+
+                JSONObject dim = DimUtil.getDimData(phoenixConn, jedisPoolClient, getTable(), getId(input));
+//                JSONObject dim = DimUtil2.readDim(jedisPoolClient, phoenixConn,  getTable(), getId(input));
 
                 //input getDimData from both
-                JSONObject dim = DimUtil.getDimData(phoenixConn, jedisPoolClient, getTable(), getId(input));
                 addDim(input, dim);
+
 
                 //result collections singleton input
                 resultFuture.complete(Collections.singletonList(input));
@@ -68,9 +84,11 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> {
                         e.printStackTrace();
                     }
                 }
+
                 if (jedisPoolClient != null) {
                     jedisPoolClient.close();
                 }
+
             }
         });
     }

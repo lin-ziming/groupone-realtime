@@ -4,10 +4,13 @@ import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.common.Constant;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.params.SetParams;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author shogunate
@@ -16,15 +19,14 @@ import java.util.List;
  */
 public class DimUtil {
     public static JSONObject getDimData(DruidPooledConnection phoenixConn, Jedis jedisPoolClient, String table, String id) {
-        //readRedis readPho writeRedis
-        JSONObject dim;
-        dim = readFromRedis(jedisPoolClient, table, id);
+
+        JSONObject dim = readFromRedis(jedisPoolClient, table, id);
         if (dim == null) {
             dim = readFromPhoenix(phoenixConn, table, id);
+//            System.out.println("read from phoenix---" + table + "---" + id + "dim+++" + dim);
             writeToRedis(jedisPoolClient, table, id, dim);
-            System.out.println("read from phoenix---" + table + "---" + id);
-        } else {
-            System.out.println("read from redis---" + table + "---" + id);
+        }else {
+//            System.out.println("read from redis---" + table + "---" + id);
         }
         return dim;
     }
@@ -53,17 +55,39 @@ public class DimUtil {
 
     private static void writeToRedis(Jedis jedisPoolClient, String table, String id, JSONObject dim) {
         String key = table + ":" + id;
-        jedisPoolClient.setex(key, Constant.REDIS_DIM_TTL, dim.toJSONString());
+
+        //key 不存在再写入值nx, 再赋过期时间ex, 一起设置防止分布式锁问题
+        jedisPoolClient.set(
+            key,
+            dim.toJSONString(),
+            SetParams.setParams().nx()
+                //过期时间加入随机值[0,10), 防止同一时间过期造成堵塞
+                .ex(Constant.REDIS_DIM_TTL + new Random().nextInt(10)));
+
+        //用完jedis在这立刻关掉
+        jedisPoolClient.close();
+
+        //弃用
+//        jedisPoolClient.setex(key, Constant.REDIS_DIM_TTL, dim.toJSONString());
     }
 
     private static JSONObject readFromRedis(Jedis jedisPoolClient, String table, String id) {
         String key = table + ":" + id;
-        JSONObject dim = null;
+//        JSONObject dim = null;
+        String value;
 
-        String value = jedisPoolClient.get(key);
-        if (value != null) {
-            dim = JSONObject.parseObject(value);
+        //exist(key) 存在再取值
+        if (jedisPoolClient.exists(key)) {
+
+            value = jedisPoolClient.get(key);
+
+            //用完jedis不能在这关掉
+//            jedisPoolClient.close();
+
+            if (value != null) {
+                return JSONObject.parseObject(value);
+            }
         }
-        return dim;
+        return null;
     }
 }

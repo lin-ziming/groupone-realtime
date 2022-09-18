@@ -1,4 +1,4 @@
-package com.atguigu.app.dwd;
+package com.atguigu.app.dwd.db;
 
 import com.atguigu.app.BaseSQLApp;
 import com.atguigu.common.Constant;

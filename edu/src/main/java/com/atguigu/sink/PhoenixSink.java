@@ -30,7 +30,7 @@ public class PhoenixSink extends RichSinkFunction<Tuple2<JSONObject, TableProces
         if (phoenixJdbcConn != null) {
             phoenixJdbcConn.close();
         }
-        //todo: Wait redis client start
+
         if (jedisPoolClient != null) {
             jedisPoolClient.close();
         }
